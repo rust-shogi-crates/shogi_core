@@ -1,0 +1,18 @@
+[package]
+name = "shogi_core_c"
+version = "0.1.0"
+edition = "2021"
+categories = ["no-std"]
+
+[features]
+default = ["std"]
+alloc = ["shogi_core/alloc"]
+std = ["shogi_core/std"]
+
+[lib]
+crate-type = [
+    "cdylib",
+]
+
+[dependencies]
+shogi_core = { path = "../shogi_core", default-features = false }

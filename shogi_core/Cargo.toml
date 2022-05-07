@@ -1,0 +1,17 @@
+[package]
+name = "shogi_core"
+version = "0.1.0"
+edition = "2021"
+categories = ["no-std"]
+
+[features]
+default = ["std"]
+alloc = []
+hash = []
+ord = []
+std = ["alloc"]
+
+[lib]
+crate-type = [
+    "rlib",
+]

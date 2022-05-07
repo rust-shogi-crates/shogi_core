@@ -1,0 +1,53 @@
+name: C bindings (shogi_core_c)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: ./shogi_core_c
+
+    strategy:
+      matrix:
+        cargo-bloat-version:
+          - '0.11.0'
+        cbindgen-version:
+          - '0.23.0'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: cargo version
+      run: cargo --version
+    - name: install nightly
+      run: rustup toolchain install nightly
+    - name: install cbindgen (v${{ matrix.cbindgen-version }})
+      run: cargo install cbindgen --version ${{ matrix.cbindgen-version }}
+    - name: install cargo-bloat (v${{ matrix.cargo-bloat-version }})
+      run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
+    - name: Build
+      run: make sharedlib
+    - name: Build headers
+      run: make -B include
+    - name: Test
+      run: make c_tests
+    - name: Are headers up to date?
+      run: git diff --exit-code --stat
+    - name: cargo bloat (display, release)
+      run: cargo +nightly bloat --release --no-default-features --features alloc
+    - name: cargo bloat (display, per-crate, release)
+      run: cargo +nightly bloat --release --no-default-features --features alloc --crates
+    - name: cargo bloat (testing, release)
+      # Size <= 40KiB?
+      run: cargo +nightly bloat --release --no-default-features --features alloc --message-format json | jq --exit-status '."file-size" <= 40960'

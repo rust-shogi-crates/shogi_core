@@ -1,0 +1,43 @@
+name: Rust (shogi_core)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: ./shogi_core
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: cargo version
+      run: cargo --version
+    - name: install nightly
+      run: rustup toolchain install nightly
+    - name: Build
+      run: cargo build --verbose
+    - name: Run tests
+      run: cargo test --verbose --locked
+    - name: Run clippy
+      run: cargo clippy --all-targets --locked
+    - name: Check formatting
+      run: cargo fmt -- --check
+    - name: Build (various features)
+      run: |
+        cargo build --verbose --no-default-features
+        cargo +nightly build --verbose --no-default-features --features alloc
+        cargo build --verbose --no-default-features --features std
+        cargo build --verbose --no-default-features --features hash
+        cargo build --verbose --no-default-features --features ord
+        cargo build --verbose --all-features
