@@ -1,8 +1,13 @@
 [package]
 name = "shogi_core_c"
 version = "0.1.0"
+description = "C bindings of shogi_core"
+authors = ["Rust shogi crates developers"]
 edition = "2021"
-categories = ["no-std"]
+repository = "https://github.com/rust-shogi-crates/shogi_core/tree/main/shogi_core_c"
+categories = ["game", "no-std"]
+keywords = ["shogi"]
+rust-version = "1.60"
 
 [features]
 default = ["std"]

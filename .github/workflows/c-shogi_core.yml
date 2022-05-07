@@ -13,10 +13,6 @@ env:
 
 jobs:
   build:
-    defaults:
-      run:
-        working-directory: ./shogi_core_c
-
     strategy:
       matrix:
         cargo-bloat-version:

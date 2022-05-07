@@ -13,10 +13,6 @@ env:
 
 jobs:
   build:
-    defaults:
-      run:
-        working-directory: ./shogi_core
-
     runs-on: ubuntu-latest
 
     steps:

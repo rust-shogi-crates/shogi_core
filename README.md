@@ -1,2 +1,2 @@
 # shogi_core
-Defines fundamental data types and functions
+This crate defines fundamental data types and functions.
