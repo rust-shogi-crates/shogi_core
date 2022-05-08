@@ -8,7 +8,7 @@ version = "0.1.0"
 
 [[package]]
 name = "shogi_core_c"
-version = "0.1.0"
+version = "0.0.0-unpublished"
 dependencies = [
  "shogi_core",
 ]

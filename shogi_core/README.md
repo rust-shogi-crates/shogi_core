@@ -1,6 +1,6 @@
 # Rust shogi crates: Core (`rlib`)
 [![crate](https://img.shields.io/crates/v/shogi_core)](https://crates.io/crates/shogi_core)
-[![docs]( https://docs.rs/shogi_core/badge.svg)](https://docs.rs/shogi_core)
+[![docs](https://docs.rs/shogi_core/badge.svg)](https://docs.rs/shogi_core)
 ![Rust Version](https://img.shields.io/badge/rustc-1.60+-blue.svg)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/mit-license.php)
 
