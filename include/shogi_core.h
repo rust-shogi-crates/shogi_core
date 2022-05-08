@@ -199,7 +199,7 @@ typedef uint8_t Square;
 typedef uint8_t OptionSquare;
 
 /**
- * A move packed in two bytes.
+ * A move packed in two bytes. C-compatible version of [`Move`].
  *
  * Representation is as follows:
  * - normal move: promote * 32768 + from * 256 + to
@@ -208,6 +208,20 @@ typedef uint8_t OptionSquare;
  * Note that the representation cannot be zero.
  */
 typedef uint16_t CompactMove;
+
+/**
+ * A piece + who owns it.
+ *
+ * `Piece` and `Option<Piece>` are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+ *
+ * Examples:
+ * ```
+ * use shogi_core::Piece;
+ * assert_eq!(core::mem::size_of::<Piece>(), 1);
+ * ```
+ */
+typedef uint8_t Piece;
 
 /**
  * A hand of a single player. A hand is a multiset of unpromoted pieces (except a king).
@@ -227,7 +241,10 @@ typedef struct Hand {
 typedef uint8_t OptionPiece;
 
 /**
- * <https://github.com/eqrion/cbindgen/issues/326>.
+ * C-compatible type for <code>[Option]<[CompactMove]></code>.
+ *
+ * cbindgen cannot deduce that <code>[Option]<[CompactMove]></code> can be represented by `uint16_t` in C, so we need to define the bridge type.
+ * See: <https://github.com/eqrion/cbindgen/issues/326>.
  */
 typedef uint16_t OptionCompactMove;
 
@@ -246,20 +263,6 @@ typedef struct PartialPosition {
   OptionPiece board[81];
   OptionCompactMove last_move;
 } PartialPosition;
-
-/**
- * A piece + who owns it.
- *
- * `Piece` and `Option<Piece>` are both 1-byte data types.
- * Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
- *
- * Examples:
- * ```
- * use shogi_core::Piece;
- * assert_eq!(core::mem::size_of::<Piece>(), 1);
- * ```
- */
-typedef uint8_t Piece;
 
 /**
  * Option<PieceKind> with defined representation.
@@ -373,9 +376,23 @@ struct Bitboard Bitboard_single(Square square);
 Color Color_flip(Color self);
 
 /**
- * Finds the `from` square, if it exists.
+ * Creates a drop move.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Color, CompactMove, Move, Piece, PieceKind, Square};
+ * let piece = Piece::new(PieceKind::Gold, Color::White);
+ * let to = Square::new(3, 4).unwrap();
+ * assert_eq!(<CompactMove as From<Move>>::from(Move::Drop { piece, to }), CompactMove::drop(piece, to));
+ * ```
  */
-struct Option_Square CompactMove_from(CompactMove self);
+CompactMove CompactMove_drop(Piece piece,
+                             Square to);
+
+/**
+ * C interface of [`CompactMove::from`].
+ */
+OptionSquare CompactMove_from(CompactMove self);
 
 /**
  * Finds whether `self` is a drop move.
@@ -386,6 +403,22 @@ bool CompactMove_is_drop(CompactMove self);
  * Finds whether `self` promotes a piece.
  */
 bool CompactMove_is_promoting(CompactMove self);
+
+/**
+ * Creates a normal move.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{CompactMove, Move, Square};
+ * let from = Square::new(1, 2).unwrap();
+ * let to = Square::new(3, 4).unwrap();
+ * let promote = false;
+ * assert_eq!(<CompactMove as From<Move>>::from(Move::Normal { from, to, promote }), CompactMove::normal(from, to, promote));
+ * ```
+ */
+CompactMove CompactMove_normal(Square from,
+                               Square to,
+                               bool promote);
 
 /**
  * Finds the `to` square.

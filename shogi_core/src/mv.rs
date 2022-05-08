@@ -1,10 +1,10 @@
 use core::num::NonZeroU16;
 
-use crate::{Piece, Square};
+use crate::{c_compat::OptionSquare, Piece, Square};
 
 /// A move.
 ///
-/// Because `Move` is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+/// Because [`Move`] is cheap to copy, it implements [`Copy`].
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
@@ -31,6 +31,13 @@ pub enum Move {
 
 impl Move {
     /// Finds the `from` square, if it exists.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, Move, Piece, PieceKind, Square};
+    /// assert_eq!(Move::Normal { from: Square::new(1, 2).unwrap(), to: Square::new(3, 4).unwrap(), promote: false}.from(), Square::new(1, 2));
+    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::new(3, 4).unwrap() }.from(), None);
+    /// ```
     pub fn from(self) -> Option<Square> {
         match self {
             Move::Normal { from, .. } => Some(from),
@@ -39,11 +46,23 @@ impl Move {
     }
 
     /// Finds the `to` square.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, Move, Piece, PieceKind, Square};
+    /// assert_eq!(Move::Normal { from: Square::new(1, 2).unwrap(), to: Square::new(3, 4).unwrap(), promote: false}.to(), Square::new(3, 4).unwrap());
+    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::new(4, 5).unwrap() }.to(), Square::new(4, 5).unwrap());
+    /// ```
     pub fn to(self) -> Square {
         match self {
             Move::Normal { to, .. } => to,
             Move::Drop { to, .. } => to,
         }
+    }
+
+    /// Finds whether `self` promotes a piece.
+    pub fn is_promoting(self) -> bool {
+        matches!(self, Move::Normal { promote: true, .. })
     }
 
     /// Finds whether `self` is a drop move.
@@ -53,7 +72,7 @@ impl Move {
     }
 }
 
-/// A move packed in two bytes.
+/// A move packed in two bytes. C-compatible version of [`Move`].
 ///
 /// Representation is as follows:
 /// - normal move: promote * 32768 + from * 256 + to
@@ -99,9 +118,41 @@ impl From<CompactMove> for Move {
 }
 
 impl CompactMove {
+    /// Creates a normal move.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{CompactMove, Move, Square};
+    /// let from = Square::new(1, 2).unwrap();
+    /// let to = Square::new(3, 4).unwrap();
+    /// let promote = false;
+    /// assert_eq!(<CompactMove as From<Move>>::from(Move::Normal { from, to, promote }), CompactMove::normal(from, to, promote));
+    /// ```
+    #[export_name = "CompactMove_normal"]
+    pub extern "C" fn normal(from: Square, to: Square, promote: bool) -> Self {
+        let value = (promote as u16) << 15 | (from.index() as u16) << 8 | to.index() as u16;
+        // Safety: value != 0 is implied from to.index() != 0
+        Self(unsafe { NonZeroU16::new_unchecked(value) })
+    }
+
+    /// Creates a drop move.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, CompactMove, Move, Piece, PieceKind, Square};
+    /// let piece = Piece::new(PieceKind::Gold, Color::White);
+    /// let to = Square::new(3, 4).unwrap();
+    /// assert_eq!(<CompactMove as From<Move>>::from(Move::Drop { piece, to }), CompactMove::drop(piece, to));
+    /// ```
+    #[export_name = "CompactMove_drop"]
+    pub extern "C" fn drop(piece: Piece, to: Square) -> Self {
+        let value = (piece.as_u8() as u16) << 8 | 128 | to.index() as u16;
+        // Safety: value != 0 is implied from to.index() != 0
+        Self(unsafe { NonZeroU16::new_unchecked(value) })
+    }
+
     /// Finds the `from` square, if it exists.
-    #[export_name = "CompactMove_from"]
-    pub extern "C" fn from(self) -> Option<Square> {
+    pub fn from(self) -> Option<Square> {
         let inner = self.0.get();
         if self.is_drop() {
             // a drop move
@@ -111,6 +162,12 @@ impl CompactMove {
             // Safety: for all valid `CompactMove` which is normal, the part masked by 0x7f00 represents a valid square.
             Some(unsafe { Square::from_u8_unchecked(from) })
         }
+    }
+
+    /// C interface of [`CompactMove::from`].
+    #[no_mangle]
+    pub extern "C" fn CompactMove_from(self) -> OptionSquare {
+        self.from().into()
     }
 
     /// Finds the `to` square.
@@ -135,7 +192,10 @@ impl CompactMove {
     }
 }
 
-/// <https://github.com/eqrion/cbindgen/issues/326>.
+/// C-compatible type for <code>[Option]<[CompactMove]></code>.
+///
+/// cbindgen cannot deduce that <code>[Option]<[CompactMove]></code> can be represented by `uint16_t` in C, so we need to define the bridge type.
+/// See: <https://github.com/eqrion/cbindgen/issues/326>.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -153,6 +213,7 @@ impl From<Option<CompactMove>> for OptionCompactMove {
 }
 
 impl From<OptionCompactMove> for Option<CompactMove> {
+    #[inline(always)]
     fn from(arg: OptionCompactMove) -> Self {
         Some(CompactMove(NonZeroU16::new(arg.0)?))
     }
@@ -185,6 +246,42 @@ mod tests {
                 let compact: CompactMove = mv.into();
                 let mv2: Move = compact.into();
                 assert_eq!(mv, mv2);
+            }
+        }
+    }
+
+    #[test]
+    fn normal_works() {
+        for from in Square::all() {
+            for to in Square::all() {
+                for promote in [false, true] {
+                    let cmv = CompactMove::normal(from, to, promote);
+                    assert_eq!(
+                        <CompactMove as From<Move>>::from(Move::Normal { from, to, promote }),
+                        cmv,
+                    );
+                    assert_eq!(cmv.from(), Some(from));
+                    assert_eq!(cmv.to(), to);
+                    assert_eq!(cmv.is_promoting(), promote);
+                    assert!(!cmv.is_drop());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn drop_works() {
+        for piece in Piece::all() {
+            for to in Square::all() {
+                let cmv = CompactMove::drop(piece, to);
+                assert_eq!(
+                    <CompactMove as From<Move>>::from(Move::Drop { piece, to }),
+                    cmv,
+                );
+                assert_eq!(cmv.from(), None);
+                assert_eq!(cmv.to(), to);
+                assert!(!cmv.is_promoting());
+                assert!(cmv.is_drop());
             }
         }
     }
