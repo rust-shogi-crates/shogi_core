@@ -1,7 +1,7 @@
 /// Kinds of pieces.
 ///
-/// `PieceKind` and `Option<PieceKind>` are both 1-byte data types.
-/// Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+/// [`PieceKind`] and <code>[Option]<[PieceKind]></code> are both 1-byte data types.
+/// Because they are cheap to copy, they implement [`Copy`].
 #[repr(u8)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -110,7 +110,7 @@ pub enum PieceKind {
 impl PieceKind {
     /// Returns the promoted version of `self`.
     ///
-    /// If `self` cannot promote, this function returns `None`.
+    /// If `self` cannot promote, this function returns [`None`].
     #[must_use]
     #[inline]
     pub fn promote(self) -> Option<Self> {
@@ -155,9 +155,9 @@ impl PieceKind {
         }
     }
 
-    /// Converts a `u8` to `PieceKind` if possible.
+    /// Converts a [`u8`] to [`PieceKind`] if possible.
     ///
-    /// If `repr` is a valid representation of `PieceKind`, this function returns Some(piece_kind).
+    /// If `repr` is a valid representation of [`PieceKind`], this function returns `Some(piece_kind)`.
     /// This condition is equivalent to `1 <= repr && repr <= 14`.
     pub fn from_u8(repr: u8) -> Option<Self> {
         if matches!(repr, 1..=14) {
@@ -168,16 +168,16 @@ impl PieceKind {
         }
     }
 
-    /// C interface of `PieceKind::from_u8`.
+    /// C interface of [`PieceKind::from_u8`].
     #[no_mangle]
     pub extern "C" fn PieceKind_from_u8(repr: u8) -> OptionPieceKind {
         Self::from_u8(repr).into()
     }
 
-    /// Converts a `u8` to `PieceKind` without checking.
+    /// Converts a [`u8`] to [`PieceKind`] without checking.
     ///
     /// # Safety
-    /// `repr` must be a valid representation of `PieceKind`.
+    /// `repr` must be a valid representation of [`PieceKind`].
     /// This condition is equivalent to `1 <= repr && repr <= 14`.
     #[export_name = "PieceKind_from_u8_unchecked"]
     #[inline(always)]
@@ -185,14 +185,14 @@ impl PieceKind {
         core::mem::transmute(repr)
     }
 
-    /// C interface of `PieceKind::promote`.
+    /// C interface of [`PieceKind::promote`].
     #[allow(non_snake_case)]
     #[no_mangle]
     pub extern "C" fn PieceKind_promote(self) -> OptionPieceKind {
         self.promote().into()
     }
 
-    /// C interface of `PieceKind::unpromote`.
+    /// C interface of [`PieceKind::unpromote`].
     #[allow(non_snake_case)]
     #[no_mangle]
     pub extern "C" fn PieceKind_unpromote(self) -> OptionPieceKind {
@@ -220,11 +220,17 @@ impl PieceKind {
     }
 }
 
-/// Option<PieceKind> with defined representation.
-/// None => 0, Some(x) => x.
+/// <code>[Option]<[PieceKind]></code> with defined representation.
 ///
-/// This type is provided only for C interoperability.
-/// Users of this type should convert to/from Option<PieceKind>.
+/// The correspondence is:
+/// [`None`] => `0`, <code>[Some]\(x\)</code> => `x`.
+/// Therefore, valid representations of this type are precisely `0..=14`.
+///
+/// This type is provided for C interoperability.
+/// cbindgen cannot deduce that <code>[Option]<[PieceKind]></code> can be represented by `uint16_t` in C, so we need to define the bridge type.
+/// Users of this type should convert to/from <code>[Option]<[PieceKind]></code>.
+///
+/// See: <https://github.com/eqrion/cbindgen/issues/326>.
 #[repr(transparent)]
 pub struct OptionPieceKind(u8);
 
@@ -235,5 +241,30 @@ impl From<Option<PieceKind>> for OptionPieceKind {
             Some(result) => result as u8,
             None => 0,
         })
+    }
+}
+
+impl From<OptionPieceKind> for Option<PieceKind> {
+    #[inline(always)]
+    fn from(arg: OptionPieceKind) -> Self {
+        if arg.0 == 0 {
+            None
+        } else {
+            // Safety: arg is a valid OptionPieceKind, which means 0 <= arg.0 && arg.0 <= 14.
+            // arg.0 == 0 is ruled out.
+            Some(unsafe { PieceKind::from_u8_unchecked(arg.0) })
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn from_u8_works() {
+        for piece_kind in PieceKind::all() {
+            assert_eq!(PieceKind::from_u8(piece_kind as u8), Some(piece_kind));
+        }
     }
 }

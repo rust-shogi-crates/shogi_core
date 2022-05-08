@@ -31,8 +31,8 @@ typedef uint8_t Color;
 /**
  * Kinds of pieces.
  *
- * `PieceKind` and `Option<PieceKind>` are both 1-byte data types.
- * Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+ * [`PieceKind`] and <code>[Option]<[PieceKind]></code> are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`].
  */
 enum PieceKind {
   /**
@@ -265,11 +265,17 @@ typedef struct PartialPosition {
 } PartialPosition;
 
 /**
- * Option<PieceKind> with defined representation.
- * None => 0, Some(x) => x.
+ * <code>[Option]<[PieceKind]></code> with defined representation.
  *
- * This type is provided only for C interoperability.
- * Users of this type should convert to/from Option<PieceKind>.
+ * The correspondence is:
+ * [`None`] => `0`, <code>[Some]\(x\)</code> => `x`.
+ * Therefore, valid representations of this type are precisely `0..=14`.
+ *
+ * This type is provided for C interoperability.
+ * cbindgen cannot deduce that <code>[Option]<[PieceKind]></code> can be represented by `uint16_t` in C, so we need to define the bridge type.
+ * Users of this type should convert to/from <code>[Option]<[PieceKind]></code>.
+ *
+ * See: <https://github.com/eqrion/cbindgen/issues/326>.
  */
 typedef uint8_t OptionPieceKind;
 
@@ -508,26 +514,26 @@ void PartialPosition_to_sfen_c(const struct PartialPosition *self, uint8_t *ptr)
 struct Bitboard PartialPosition_vacant_bitboard(const struct PartialPosition *self);
 
 /**
- * C interface of `PieceKind::from_u8`.
+ * C interface of [`PieceKind::from_u8`].
  */
 OptionPieceKind PieceKind_from_u8(uint8_t repr);
 
 /**
- * Converts a `u8` to `PieceKind` without checking.
+ * Converts a [`u8`] to [`PieceKind`] without checking.
  *
  * # Safety
- * `repr` must be a valid representation of `PieceKind`.
+ * `repr` must be a valid representation of [`PieceKind`].
  * This condition is equivalent to `1 <= repr && repr <= 14`.
  */
 PieceKind PieceKind_from_u8_unchecked(uint8_t repr);
 
 /**
- * C interface of `PieceKind::promote`.
+ * C interface of [`PieceKind::promote`].
  */
 OptionPieceKind PieceKind_promote(PieceKind self);
 
 /**
- * C interface of `PieceKind::unpromote`.
+ * C interface of [`PieceKind::unpromote`].
  */
 OptionPieceKind PieceKind_unpromote(PieceKind self);
 
