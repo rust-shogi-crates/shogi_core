@@ -1,11 +1,11 @@
 use core::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not};
 
-use crate::Square;
+use crate::{c_compat::OptionSquare, Square};
 
 /// A subset of all squares.
 ///
-/// Because `Bitboard` is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
-/// Its [`Default`](https://doc.rust-lang.org/core/default/trait.Default.html) value is an empty instance.
+/// Because [`Bitboard`] is cheap to copy, it implements [`Copy`].
+/// Its [`Default`] value is an empty instance.
 #[repr(C)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -14,7 +14,7 @@ use crate::Square;
 pub struct Bitboard([u64; 2]);
 
 impl Bitboard {
-    /// Creates an empty `BitBoard`.
+    /// Creates an empty [`Bitboard`].
     ///
     /// Examples:
     /// ```
@@ -27,7 +27,7 @@ impl Bitboard {
         Self::default()
     }
 
-    /// Creates a `BitBoard` with a single element.
+    /// Creates a [`Bitboard`] with a single element.
     ///
     /// Examples:
     /// ```
@@ -43,7 +43,7 @@ impl Bitboard {
         Self(inner)
     }
 
-    /// Finds how many elements this `Bitboard` has.
+    /// Finds how many elements this [`Bitboard`] has.
     ///
     /// Examples:
     /// ```
@@ -74,7 +74,7 @@ impl Bitboard {
         self.0 == [0; 2]
     }
 
-    /// Finds if `self` as a subset contains `square`.
+    /// Finds if `self` as a subset contains a [`Square`].
     ///
     /// Examples:
     /// ```
@@ -112,9 +112,21 @@ impl Bitboard {
         Self(returned)
     }
 
-    /// If `self` is not empty, find a square in `self` and returns it.
+    /// If `self` is not empty, find a [`Square`] in `self` and returns it, removing it from `self`.
     ///
-    /// The returned value is unspecified.
+    /// The returned value is unspecified. It is guaranteed that the returned [`Square`] is a member of `self`.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::{Bitboard, Square};
+    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
+    /// let sq99 = Bitboard::single(Square::new(9, 9).unwrap());
+    /// let mut bitboard = sq11 | sq99;
+    /// assert!(bitboard.pop().is_some());
+    /// assert!(bitboard.pop().is_some());
+    /// assert!(bitboard.pop().is_none()); // after `pop`ping twice `bitboard` becomes empty
+    /// assert!(bitboard.is_empty());
+    /// ```
     pub fn pop(&mut self) -> Option<Square> {
         // TODO: optimize
         for i in 1..=81 {
@@ -125,6 +137,12 @@ impl Bitboard {
             }
         }
         None
+    }
+
+    /// C interface of [`Bitboard::pop`].
+    #[no_mangle]
+    pub extern "C" fn Bitboard_pop(&mut self) -> OptionSquare {
+        self.pop().into()
     }
 }
 
@@ -149,14 +167,46 @@ macro_rules! define_bit_trait {
                 Self([self.0[0] $op rhs.0[0], self.0[1] $op rhs.0[1]])
             }
         }
+        // Supports reference types in favor of https://doc.rust-lang.org/std/ops/index.html
+        impl $trait<&'_ Bitboard> for Bitboard {
+            type Output = Bitboard;
+
+            fn $funname(self, rhs: &Self) -> Self::Output {
+                self $op *rhs
+            }
+        }
+        impl $trait<Bitboard> for &'_ Bitboard {
+            type Output = Bitboard;
+
+            fn $funname(self, rhs: Bitboard) -> Self::Output {
+                *self $op rhs
+            }
+        }
+        impl $trait<&'_ Bitboard> for &'_ Bitboard {
+            type Output = Bitboard;
+
+            fn $funname(self, rhs: &Bitboard) -> Self::Output {
+                *self $op *rhs
+            }
+        }
         impl $assign_trait for Bitboard {
             fn $assign_funname(&mut self, rhs: Self) {
                 *self = *self $op rhs;
             }
         }
+        impl $assign_trait<&'_ Bitboard> for Bitboard {
+            fn $assign_funname(&mut self, rhs: &Self) {
+                *self = *self $op *rhs;
+            }
+        }
         impl $assign_trait<Square> for Bitboard {
             fn $assign_funname(&mut self, rhs: Square) {
                 *self = *self $op Bitboard::single(rhs);
+            }
+        }
+        impl $assign_trait<&'_ Square> for Bitboard {
+            fn $assign_funname(&mut self, rhs: &Square) {
+                *self = *self $op Bitboard::single(*rhs);
             }
         }
 
@@ -204,6 +254,23 @@ impl Not for Bitboard {
     /// ```
     fn not(self) -> Self::Output {
         Self([!self.0[0], !self.0[1] & ((1 << 17) - 1)])
+    }
+}
+
+impl Not for &'_ Bitboard {
+    type Output = Bitboard;
+
+    /// Returns the complementary subset of `self`.
+    ///
+    /// You can create a subset consisting of the entire board with `!Bitboard::empty()`.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::Bitboard;
+    /// assert_eq!((!&Bitboard::empty()).count(), 81);
+    /// ```
+    fn not(self) -> Self::Output {
+        !*self
     }
 }
 

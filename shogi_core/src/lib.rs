@@ -60,6 +60,9 @@ pub mod c_compat {
     pub use crate::piece::OptionPiece;
 
     #[doc(inline)]
+    pub use crate::square::OptionSquare;
+
+    #[doc(inline)]
     pub use crate::mv::OptionCompactMove;
 }
 

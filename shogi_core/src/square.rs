@@ -189,6 +189,29 @@ impl Square {
     }
 }
 
+/// <https://github.com/eqrion/cbindgen/issues/326>.
+#[repr(transparent)]
+#[derive(Eq, PartialEq, Clone, Copy, Debug)]
+#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
+#[cfg_attr(feature = "hash", derive(Hash))]
+pub struct OptionSquare(u8);
+
+impl From<Option<Square>> for OptionSquare {
+    #[inline(always)]
+    fn from(arg: Option<Square>) -> Self {
+        Self(match arg {
+            Some(result) => result.0.get(),
+            None => 0,
+        })
+    }
+}
+
+impl From<OptionSquare> for Option<Square> {
+    fn from(arg: OptionSquare) -> Self {
+        Some(Square(NonZeroU8::new(arg.0)?))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

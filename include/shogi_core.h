@@ -178,8 +178,8 @@ typedef struct Position Position;
 /**
  * A subset of all squares.
  *
- * Because `Bitboard` is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
- * Its [`Default`](https://doc.rust-lang.org/core/default/trait.Default.html) value is an empty instance.
+ * Because [`Bitboard`] is cheap to copy, it implements [`Copy`].
+ * Its [`Default`] value is an empty instance.
  */
 typedef struct Bitboard {
   uint64_t _0[2];
@@ -192,6 +192,11 @@ typedef struct Bitboard {
  * Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
  */
 typedef uint8_t Square;
+
+/**
+ * <https://github.com/eqrion/cbindgen/issues/326>.
+ */
+typedef uint8_t OptionSquare;
 
 /**
  * A move packed in two bytes.
@@ -266,7 +271,7 @@ typedef uint8_t Piece;
 typedef uint8_t OptionPieceKind;
 
 /**
- * Finds if `self` as a subset contains `square`.
+ * Finds if `self` as a subset contains a [`Square`].
  *
  * Examples:
  * ```
@@ -279,7 +284,7 @@ typedef uint8_t OptionPieceKind;
 bool Bitboard_contains(struct Bitboard self, Square square);
 
 /**
- * Finds how many elements this `Bitboard` has.
+ * Finds how many elements this [`Bitboard`] has.
  *
  * Examples:
  * ```
@@ -292,7 +297,7 @@ bool Bitboard_contains(struct Bitboard self, Square square);
 uint8_t Bitboard_count(struct Bitboard self);
 
 /**
- * Creates an empty `BitBoard`.
+ * Creates an empty [`Bitboard`].
  *
  * Examples:
  * ```
@@ -338,7 +343,12 @@ bool Bitboard_is_empty(struct Bitboard self);
 struct Bitboard Bitboard_not(struct Bitboard a);
 
 /**
- * Creates a `BitBoard` with a single element.
+ * C interface of [`Bitboard::pop`].
+ */
+OptionSquare Bitboard_pop(struct Bitboard *self);
+
+/**
+ * Creates a [`Bitboard`] with a single element.
  *
  * Examples:
  * ```
