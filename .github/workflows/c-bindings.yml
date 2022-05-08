@@ -10,6 +10,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: --deny warnings
+  SHARED_OBJECT: target/release/libshogi_core_c.so
 
 jobs:
   build:
@@ -34,8 +35,14 @@ jobs:
       run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
     - name: Build
       run: make sharedlib
-    - name: Check if headers are up to date
+    - name: Assert that headers are up to date
       run: make check-include
+    - name: Assert that cdylib does not contain `panic_bounds_check`-related symbols
+      run: |
+        if nm ${SHARED_OBJECT} | fgrep panic_bounds_check; [ $? -ne 1 ]; then
+          echo '`panic_bounds_check`-related symbols found in '${SHARED_OBJECT}
+          exit 1
+        fi
     - name: Test
       run: make c_tests
     - name: cargo bloat (display, release)

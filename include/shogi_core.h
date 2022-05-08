@@ -232,8 +232,8 @@ typedef uint8_t Piece;
  *
  * This type can hold up to 255 pieces of each kind, although the rule of shogi prohibits it.
  *
- * Because `Hand` is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
- * Its [`Default`](https://doc.rust-lang.org/core/default/trait.Default.html) value is an empty instance.
+ * Because [`Hand`] is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+ * Its [`Default`] value is an empty instance.
  */
 typedef struct Hand {
   uint8_t _0[8];
@@ -435,17 +435,21 @@ CompactMove CompactMove_normal(Square from,
 Square CompactMove_to(CompactMove self);
 
 /**
- * C interface of `Hand::added`.
+ * C interface of [`Hand::added`].
+ *
+ * This function returns true if and only if adding was successful.
  */
 bool Hand_add(struct Hand *self, PieceKind piece_kind);
 
 /**
- * C interface of `Hand::count`.
+ * C interface of [`Hand::count`].
+ *
+ * This function returns true if and only if `piece_kind` can be a piece in hand.
  */
 uint8_t Hand_count(struct Hand self, PieceKind piece_kind);
 
 /**
- * Creates an empty instance of `Hand`.
+ * Creates an empty instance of [`Hand`].
  *
  * Examples:
  * ```
@@ -456,7 +460,9 @@ uint8_t Hand_count(struct Hand self, PieceKind piece_kind);
 struct Hand Hand_new(void);
 
 /**
- * C interface of `Hand::removed`.
+ * C interface of [`Hand::removed`].
+ *
+ * This function returns true if and only if removal was successful.
  */
 bool Hand_remove(struct Hand *self, PieceKind piece_kind);
 

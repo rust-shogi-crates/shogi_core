@@ -4,8 +4,8 @@ use crate::{PieceKind, ToUsi};
 ///
 /// This type can hold up to 255 pieces of each kind, although the rule of shogi prohibits it.
 ///
-/// Because `Hand` is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
-/// Its [`Default`](https://doc.rust-lang.org/core/default/trait.Default.html) value is an empty instance.
+/// Because [`Hand`] is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+/// Its [`Default`] value is an empty instance.
 #[repr(C)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -13,7 +13,7 @@ use crate::{PieceKind, ToUsi};
 pub struct Hand([u8; 8]);
 
 impl Hand {
-    /// Creates an empty instance of `Hand`.
+    /// Creates an empty instance of [`Hand`].
     ///
     /// Examples:
     /// ```
@@ -25,7 +25,7 @@ impl Hand {
         Self::default()
     }
 
-    /// Find a new `Hand`, with `piece_kind` added.
+    /// Find a new [`Hand`] with `piece_kind` added, if possible.
     ///
     /// Examples:
     /// ```
@@ -61,7 +61,7 @@ impl Hand {
         None
     }
 
-    /// Find a new `Hand`, with a single piece of `piece_kind` removed.
+    /// Find a new [`Hand`], with a single piece of `piece_kind` removed, if possible.
     ///
     /// Examples:
     /// ```
@@ -100,7 +100,9 @@ impl Hand {
         None
     }
 
-    /// C interface of `Hand::added`.
+    /// C interface of [`Hand::added`].
+    ///
+    /// This function returns true if and only if adding was successful.
     #[no_mangle]
     pub extern "C" fn Hand_add(&mut self, piece_kind: PieceKind) -> bool {
         if let Some(new) = self.added(piece_kind) {
@@ -111,7 +113,9 @@ impl Hand {
         }
     }
 
-    /// C interface of `Hand::removed`.
+    /// C interface of [`Hand::removed`].
+    ///
+    /// This function returns true if and only if removal was successful.
     #[no_mangle]
     pub extern "C" fn Hand_remove(&mut self, piece_kind: PieceKind) -> bool {
         if let Some(new) = self.removed(piece_kind) {
@@ -122,29 +126,54 @@ impl Hand {
         }
     }
 
-    /// C interface of `Hand::count`.
+    /// C interface of [`Hand::count`].
+    ///
+    /// This function returns true if and only if `piece_kind` can be a piece in hand.
     #[no_mangle]
     pub extern "C" fn Hand_count(self, piece_kind: PieceKind) -> u8 {
         self.count(piece_kind).unwrap_or(0)
     }
 }
 
+/// Finds the USI representation of hand: <https://web.archive.org/web/20080131070731/http://www.glaurungchess.com/shogi/usi.html>
+///
+/// The order of pieces are defined: `RBGSNLPrbgsnlp`.
+///
+/// Examples:
+/// ```
+/// use shogi_core::{Hand, PieceKind, ToUsi};
+/// let hand = Hand::new().added(PieceKind::Pawn).unwrap();
+/// let hand = hand.added(PieceKind::Pawn).unwrap();
+/// let hand = hand.added(PieceKind::Pawn).unwrap();
+///
+/// assert_eq!([hand; 2].to_usi_owned(), "3P3p");
+///
+/// let hand = hand.added(PieceKind::Rook).unwrap();
+/// let hand = hand.added(PieceKind::Bishop).unwrap();
+/// assert_eq!([Hand::default(), hand].to_usi_owned(), "rb3p");
+/// ```
 impl ToUsi for [Hand; 2] {
     fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
         if self[0].0.iter().all(|&x| x == 0) && self[1].0.iter().all(|&x| x == 0) {
-            return sink.write_char('-');
+            return sink.write_str("-");
         }
-        let pieces = [
-            ['P', 'L', 'N', 'S', 'G', 'B', 'R'],
-            ['p', 'l', 'n', 's', 'g', 'b', 'r'],
-        ];
+        let pieces = [b"PLNSGBR", b"plnsgbr"];
         for i in 0..2 {
-            for j in 0..7 {
-                if self[i].0[j] > 0 {
-                    if self[i].0[j] >= 2 {
-                        sink.write_fmt(format_args!("{}", self[i].0[j]))?;
+            for j in (0..7).rev() {
+                // Safety: 0 <= j < 8
+                let count = *unsafe { self[i].0.get_unchecked(j) };
+                if count > 0 {
+                    if count >= 2 {
+                        sink.write_fmt(format_args!("{}", count))?;
                     }
-                    sink.write_char(pieces[i][j])?;
+                    // Safety: because pieces[i][j] is an ASCII character, [pieces[i][j]] is always a valid UTF-8 encoding.
+                    // Furthermore, 0 <= j < 8 holds, which implies pieces[i][j] is always in bounds.
+                    let str = unsafe {
+                        core::str::from_utf8_unchecked(core::slice::from_ref(
+                            pieces[i].get_unchecked(j),
+                        ))
+                    };
+                    sink.write_str(str)?;
                 }
             }
         }
