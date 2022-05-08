@@ -13,16 +13,20 @@
 /**
  * A player.
  *
- * `Color` and `Option<Color>` are both 1-byte data types.
- * Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+ * [`Color`] and <code>[Option]<[Color]></code> are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`].
  */
 enum Color {
   /**
    * Black, who plays first. Known as `先手` (*sente*).
+   *
+   * Its representation is 1.
    */
   Black = 1,
   /**
    * White, who plays second. Known as `後手` (*gote*).
+   *
+   * Its representation is 2.
    */
   White = 2,
 };
@@ -376,7 +380,6 @@ struct Bitboard Bitboard_single(Square square);
  * use shogi_core::Color;
  * assert_eq!(Color::Black.flip(), Color::White);
  * assert_eq!(Color::White.flip(), Color::Black);
- * assert_eq!(core::mem::size_of::<Option<Color>>(), 1);
  * ```
  */
 Color Color_flip(Color self);

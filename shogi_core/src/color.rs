@@ -2,16 +2,20 @@ use crate::ToUsi;
 
 /// A player.
 ///
-/// `Color` and `Option<Color>` are both 1-byte data types.
-/// Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+/// [`Color`] and <code>[Option]<[Color]></code> are both 1-byte data types.
+/// Because they are cheap to copy, they implement [`Copy`].
 #[repr(u8)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Color {
     /// Black, who plays first. Known as `先手` (*sente*).
+    ///
+    /// Its representation is 1.
     Black = 1,
     /// White, who plays second. Known as `後手` (*gote*).
+    ///
+    /// Its representation is 2.
     White = 2,
 }
 
@@ -23,7 +27,6 @@ impl Color {
     /// use shogi_core::Color;
     /// assert_eq!(Color::Black.flip(), Color::White);
     /// assert_eq!(Color::White.flip(), Color::Black);
-    /// assert_eq!(core::mem::size_of::<Option<Color>>(), 1);
     /// ```
     #[export_name = "Color_flip"]
     pub extern "C" fn flip(self) -> Self {
@@ -33,7 +36,7 @@ impl Color {
         unsafe { core::mem::transmute(self as u8 ^ 3) }
     }
 
-    /// Returns all possible `Color`s.
+    /// Returns all possible `Color`s in the ascending order of their discriminants.
     pub fn all() -> [Self; 2] {
         [Color::Black, Color::White]
     }
@@ -41,9 +44,9 @@ impl Color {
 
 impl ToUsi for Color {
     fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
-        sink.write_char(match *self {
-            Color::Black => 'B',
-            Color::White => 'W',
+        sink.write_str(match *self {
+            Color::Black => "B",
+            Color::White => "W",
         })
     }
 }
