@@ -23,7 +23,7 @@ impl Position {
         &self.inner
     }
 
-    /// Returns the initial position of [self], i.e., the position before any moves given to it.
+    /// Returns the initial position of [Position], i.e., the position before any moves given to it.
     #[export_name = "Position_initial_position"]
     pub extern "C" fn initial_position(&self) -> &PartialPosition {
         &self.initial

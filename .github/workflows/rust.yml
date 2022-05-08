@@ -1,4 +1,4 @@
-name: Rust (shogi_core)
+name: Rust
 
 on:
   push:
@@ -9,7 +9,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: -D warnings
+  RUSTFLAGS: --deny warnings
+  RUSTDOCFLAGS: --deny warnings
 
 jobs:
   build:
@@ -37,3 +38,5 @@ jobs:
         cargo build --verbose --no-default-features --features hash
         cargo build --verbose --no-default-features --features ord
         cargo build --verbose --all-features
+    - name: Document
+      run: cargo doc --verbose

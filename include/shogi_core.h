@@ -524,7 +524,7 @@ void Position_destruct(struct Position *ptr);
 struct Hand Position_hand_of_a_player(const struct Position *self, Color color);
 
 /**
- * Returns the initial position of [self], i.e., the position before any moves given to it.
+ * Returns the initial position of [Position], i.e., the position before any moves given to it.
  */
 const struct PartialPosition *Position_initial_position(const struct Position *self);
 

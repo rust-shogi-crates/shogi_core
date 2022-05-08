@@ -1,4 +1,4 @@
-name: C bindings (shogi_core_c)
+name: C bindings
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: -D warnings
+  RUSTFLAGS: --deny warnings
 
 jobs:
   build:
@@ -34,12 +34,10 @@ jobs:
       run: cargo install cargo-bloat --version ${{ matrix.cargo-bloat-version }}
     - name: Build
       run: make sharedlib
-    - name: Build headers
-      run: make -B include
+    - name: Check if headers are up to date
+      run: make check-include
     - name: Test
       run: make c_tests
-    - name: Are headers up to date?
-      run: git diff --exit-code --stat
     - name: cargo bloat (display, release)
       run: cargo +nightly bloat --release --no-default-features --features alloc
     - name: cargo bloat (display, per-crate, release)
