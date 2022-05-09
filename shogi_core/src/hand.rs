@@ -1,3 +1,4 @@
+use crate::common::{write_ascii_byte, write_u8};
 use crate::{PieceKind, ToUsi};
 
 /// A hand of a single player. A hand is a multiset of unpromoted pieces (except a king).
@@ -7,7 +8,7 @@ use crate::{PieceKind, ToUsi};
 /// Because [`Hand`] is cheap to copy, it implements [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
 /// Its [`Default`] value is an empty instance.
 #[repr(C)]
-#[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
+#[derive(Eq, Clone, Copy, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Hand([u8; 8]);
@@ -21,6 +22,7 @@ impl Hand {
     /// assert_eq!(Hand::new(), Hand::default());
     /// ```
     #[export_name = "Hand_new"]
+    #[inline(always)]
     pub extern "C" fn new() -> Self {
         Self::default()
     }
@@ -133,6 +135,19 @@ impl Hand {
     pub extern "C" fn Hand_count(self, piece_kind: PieceKind) -> u8 {
         self.count(piece_kind).unwrap_or(0)
     }
+
+    #[inline(always)]
+    fn as_u64(self) -> u64 {
+        // Safety: `sizeof::<[u8; 8]>()` = `sizeof::<u64>()` = 8
+        unsafe { core::mem::transmute(self) }
+    }
+}
+
+impl PartialEq for Hand {
+    #[inline(always)]
+    fn eq(&self, other: &Self) -> bool {
+        self.as_u64() == other.as_u64()
+    }
 }
 
 /// Finds the USI representation of hand: <https://web.archive.org/web/20080131070731/http://www.glaurungchess.com/shogi/usi.html>
@@ -154,7 +169,7 @@ impl Hand {
 /// ```
 impl ToUsi for [Hand; 2] {
     fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
-        if self[0].0.iter().all(|&x| x == 0) && self[1].0.iter().all(|&x| x == 0) {
+        if self[0] == Hand::new() && self[1] == Hand::new() {
             return sink.write_str("-");
         }
         let pieces = [b"PLNSGBR", b"plnsgbr"];
@@ -164,16 +179,11 @@ impl ToUsi for [Hand; 2] {
                 let count = *unsafe { self[i].0.get_unchecked(j) };
                 if count > 0 {
                     if count >= 2 {
-                        sink.write_fmt(format_args!("{}", count))?;
+                        write_u8(sink, count)?;
                     }
-                    // Safety: because pieces[i][j] is an ASCII character, [pieces[i][j]] is always a valid UTF-8 encoding.
+                    // Safety: `pieces[i][j]` is an ASCII byte.
                     // Furthermore, 0 <= j < 8 holds, which implies pieces[i][j] is always in bounds.
-                    let str = unsafe {
-                        core::str::from_utf8_unchecked(core::slice::from_ref(
-                            pieces[i].get_unchecked(j),
-                        ))
-                    };
-                    sink.write_str(str)?;
+                    unsafe { write_ascii_byte(sink, *pieces[i].get_unchecked(j)) }?;
                 }
             }
         }

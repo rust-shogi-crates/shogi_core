@@ -1,10 +1,11 @@
-#![no_std] // Forbids using std::*.
+#![cfg_attr(not(test), no_std)] // Forbids using std::*.
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
 mod bitboard;
 mod color;
+mod common;
 mod hand;
 mod legality;
 mod mv;

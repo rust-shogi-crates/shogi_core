@@ -2,6 +2,7 @@ use core::fmt::{Result as FmtResult, Write};
 use core::mem::MaybeUninit;
 
 use crate::c_compat::{OptionCompactMove, OptionPiece};
+use crate::common::write_u16;
 use crate::{Bitboard, Color, CompactMove, Hand, Move, Piece, PieceKind, Square, ToUsi};
 
 /// A position. It provides sufficient data for legality checking.
@@ -502,7 +503,7 @@ impl PartialPosition {
         sink.write_char(' ')?;
         self.hands.to_usi(sink)?;
         sink.write_char(' ')?;
-        sink.write_fmt(format_args!("{}", self.ply))?;
+        write_u16(sink, self.ply)?;
         Ok(())
     }
 
