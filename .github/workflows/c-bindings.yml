@@ -55,6 +55,8 @@ jobs:
           echo '`write_char` found in '${SHARED_OBJECT}
           exit 1
         fi
+    - name: '`readelf` (section headers)'
+      run: readelf --section-headers ${SHARED_OBJECT}
     - name: Test
       run: make c_tests
     - name: cargo bloat (display, release)
