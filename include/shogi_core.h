@@ -168,8 +168,6 @@ enum PieceKind {
 };
 typedef uint8_t PieceKind;
 
-typedef struct Option_Piece Option_Piece;
-
 typedef struct Option_Square Option_Square;
 
 #if defined(DEFINE_ALLOC)
@@ -222,13 +220,15 @@ typedef uint16_t CompactMove;
 /**
  * A piece + who owns it.
  *
- * `Piece` and `Option<Piece>` are both 1-byte data types.
- * Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+ * [`Piece`] and <code>[Option]<[Piece]></code> are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`].
  *
+ * Valid representations are `1..=14`, and `17..=30`. `1..=14` represents a black [`Piece`] and `17..=30` represents a white [`Piece`].
  * Examples:
  * ```
- * use shogi_core::Piece;
+ * use shogi_core::{Color, Piece, PieceKind};
  * assert_eq!(core::mem::size_of::<Piece>(), 1);
+ * assert!(Piece::new(PieceKind::Pawn, Color::Black).as_u8() <= 14);
  * ```
  */
 typedef uint8_t Piece;
@@ -246,7 +246,12 @@ typedef struct Hand {
 } Hand;
 
 /**
- * <https://github.com/eqrion/cbindgen/issues/326>.
+ * C-compatible type for <code>[Option]<[Piece]></code> with defined representations.
+ *
+ * Valid representations are `0..=14`, and `17..=30`. `0` represents [`None`], `1..=14` represents a black [`Piece`] and `17..=30` represents a white [`Piece`].
+ *
+ * cbindgen cannot deduce that <code>[Option]<[Piece]></code> can be represented by `uint8_t` in C, so we need to define the bridge type.
+ * See: <https://github.com/eqrion/cbindgen/issues/326>
  */
 typedef uint8_t OptionPiece;
 
@@ -553,29 +558,29 @@ OptionPieceKind PieceKind_promote(PieceKind self);
 OptionPieceKind PieceKind_unpromote(PieceKind self);
 
 /**
- * Finds the `Color` of this piece.
+ * Finds the [`Color`] of this piece.
  */
 Color Piece_color(Piece self);
 
 /**
- * Creates a new `Piece` from `PieceKind` and `Color`.
+ * Creates a new [`Piece`] from a [`PieceKind`] and a [`Color`].
  */
 Piece Piece_new(PieceKind piece_kind, Color color);
 
 /**
- * Finds the `PieceKind` of this piece.
+ * Finds the [`PieceKind`] of this piece.
  */
 PieceKind Piece_piece_kind(Piece self);
 
 /**
- * Promote a `Piece`. Same as `PieceKind::promote` with color.
+ * C interface of [`Piece::promote`].
  */
-struct Option_Piece Piece_promote(Piece self);
+OptionPiece Piece_promote(Piece self);
 
 /**
- * Un-promote a `Piece`. Same as `PieceKind::unpromote` with color.
+ * C interface of [`Piece::unpromote`].
  */
-struct Option_Piece Piece_unpromote(Piece self);
+OptionPiece Piece_unpromote(Piece self);
 
 /**
  * Destructs a `Position`.

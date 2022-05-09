@@ -5,13 +5,15 @@ use crate::{Color, PieceKind, ToUsi};
 
 /// A piece + who owns it.
 ///
-/// `Piece` and `Option<Piece>` are both 1-byte data types.
-/// Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+/// [`Piece`] and <code>[Option]<[Piece]></code> are both 1-byte data types.
+/// Because they are cheap to copy, they implement [`Copy`].
 ///
+/// Valid representations are `1..=14`, and `17..=30`. `1..=14` represents a black [`Piece`] and `17..=30` represents a white [`Piece`].
 /// Examples:
 /// ```
-/// use shogi_core::Piece;
+/// use shogi_core::{Color, Piece, PieceKind};
 /// assert_eq!(core::mem::size_of::<Piece>(), 1);
+/// assert!(Piece::new(PieceKind::Pawn, Color::Black).as_u8() <= 14);
 /// ```
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
@@ -20,7 +22,12 @@ use crate::{Color, PieceKind, ToUsi};
 // Internal representation: 1..=14: black, 17..=30: white
 pub struct Piece(NonZeroU8);
 
-/// <https://github.com/eqrion/cbindgen/issues/326>.
+/// C-compatible type for <code>[Option]<[Piece]></code> with defined representations.
+///
+/// Valid representations are `0..=14`, and `17..=30`. `0` represents [`None`], `1..=14` represents a black [`Piece`] and `17..=30` represents a white [`Piece`].
+///
+/// cbindgen cannot deduce that <code>[Option]<[Piece]></code> can be represented by `uint8_t` in C, so we need to define the bridge type.
+/// See: <https://github.com/eqrion/cbindgen/issues/326>
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -28,7 +35,7 @@ pub struct Piece(NonZeroU8);
 pub struct OptionPiece(u8);
 
 impl Piece {
-    /// Creates a new `Piece` from `PieceKind` and `Color`.
+    /// Creates a new [`Piece`] from a [`PieceKind`] and a [`Color`].
     #[must_use]
     #[export_name = "Piece_new"]
     pub extern "C" fn new(piece_kind: PieceKind, color: Color) -> Self {
@@ -41,7 +48,7 @@ impl Piece {
         // Safety: disc > 0 always holds
         Piece(unsafe { NonZeroU8::new_unchecked(value) })
     }
-    /// An inverse of `new`. Finds `PieceKind` and `Color` from a `Piece`.
+    /// An inverse of [`Piece::new`]. Finds a [`PieceKind`] and a [`Color`] from a [`Piece`].
     #[must_use]
     pub fn to_parts(self) -> (PieceKind, Color) {
         let data = self.0.get();
@@ -56,13 +63,13 @@ impl Piece {
             },
         )
     }
-    /// Finds the `PieceKind` of this piece.
+    /// Finds the [`PieceKind`] of this piece.
     #[must_use]
     #[export_name = "Piece_piece_kind"]
     pub extern "C" fn piece_kind(self) -> PieceKind {
         self.to_parts().0
     }
-    /// Finds the `Color` of this piece.
+    /// Finds the [`Color`] of this piece.
     #[must_use]
     #[export_name = "Piece_color"]
     pub extern "C" fn color(self) -> Color {
@@ -75,28 +82,39 @@ impl Piece {
         self.0.get()
     }
 
-    /// Promote a `Piece`. Same as `PieceKind::promote` with color.
+    /// Promote a [`Piece`]. Same as [`PieceKind::promote`] with color.
     #[must_use]
-    #[export_name = "Piece_promote"]
-    pub extern "C" fn promote(self) -> Option<Piece> {
+    pub fn promote(self) -> Option<Piece> {
         let (piece_kind, color) = self.to_parts();
         Some(Self::new(piece_kind.promote()?, color))
     }
 
-    /// Un-promote a `Piece`. Same as `PieceKind::unpromote` with color.
+    /// C interface of [`Piece::promote`].
+    #[no_mangle]
+    pub extern "C" fn Piece_promote(self) -> OptionPiece {
+        self.promote().into()
+    }
+
+    /// Un-promote a [`Piece`]. Same as [`PieceKind::unpromote`] with color.
     #[must_use]
-    #[export_name = "Piece_unpromote"]
-    pub extern "C" fn unpromote(self) -> Option<Piece> {
+    pub fn unpromote(self) -> Option<Piece> {
         let (piece_kind, color) = self.to_parts();
         Some(Self::new(piece_kind.unpromote()?, color))
     }
 
+    /// C interface of [`Piece::unpromote`].
+    #[no_mangle]
+    pub extern "C" fn Piece_unpromote(self) -> OptionPiece {
+        self.unpromote().into()
+    }
+
     /// `value` must be in range 1..=14 or 17..=30.
-    pub(crate) unsafe fn from_u8(value: u8) -> Self {
+    #[inline(always)]
+    pub(crate) unsafe fn from_u8_unchecked(value: u8) -> Self {
         Self(NonZeroU8::new_unchecked(value))
     }
 
-    /// Returns all possible `Piece`s.
+    /// Returns all possible [`Piece`]s.
     pub fn all() -> [Self; 28] {
         let mut result = [Self::new(PieceKind::Pawn, Color::Black); 28];
         let piece_kinds = PieceKind::all();
@@ -124,6 +142,7 @@ impl From<Option<Piece>> for OptionPiece {
 }
 
 impl From<OptionPiece> for Option<Piece> {
+    #[inline(always)]
     fn from(arg: OptionPiece) -> Self {
         Some(Piece(NonZeroU8::new(arg.0)?))
     }

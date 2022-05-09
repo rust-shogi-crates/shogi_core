@@ -105,7 +105,7 @@ impl From<CompactMove> for Move {
         if mv.is_drop() {
             // a drop move
             let piece = (inner >> 8) as u8;
-            let piece = unsafe { Piece::from_u8(piece) };
+            let piece = unsafe { Piece::from_u8_unchecked(piece) };
             Move::Drop { piece, to }
         } else {
             let from = ((inner >> 8) & 127) as u8;
