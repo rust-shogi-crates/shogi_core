@@ -128,15 +128,23 @@ impl Bitboard {
     /// assert!(bitboard.is_empty());
     /// ```
     pub fn pop(&mut self) -> Option<Square> {
-        // TODO: optimize
-        for i in 1..=81 {
-            let square = unsafe { Square::from_u8_unchecked(i) };
-            if self.contains(square) {
-                *self ^= square;
-                return Some(square);
-            }
+        if self.0[0] != 0 {
+            let index = self.0[0].trailing_zeros() + 1;
+            // Safety: 1 <= index <= 64
+            let square = unsafe { Square::from_u8_unchecked(index as u8) };
+            debug_assert!(self.contains(square));
+            *self ^= square;
+            return Some(square);
         }
-        None
+        if self.0[1] == 0 {
+            return None;
+        }
+        let index = self.0[1].trailing_zeros() + 64 + 1;
+        // Safety: `65 <= index <= 81` holds because `self.0[1] & 0x1ffff` is not zero
+        let square = unsafe { Square::from_u8_unchecked(index as u8) };
+        debug_assert!(self.contains(square));
+        *self ^= square;
+        Some(square)
     }
 
     /// C interface of [`Bitboard::pop`].
@@ -306,6 +314,27 @@ mod tests {
             for rank in 1..=9 {
                 let sq = Square::new(file, rank).unwrap();
                 assert_eq!(Bitboard::single(sq).flip(), Bitboard::single(sq.flip()));
+            }
+        }
+    }
+
+    #[test]
+    fn pop_works() {
+        for square in Square::all() {
+            let mut bitboard = Bitboard::single(square);
+            assert_eq!(bitboard.pop(), Some(square));
+            assert!(bitboard.is_empty());
+        }
+        for sq1 in Square::all() {
+            for sq2 in Square::all() {
+                if sq1 == sq2 {
+                    continue;
+                }
+                let mut bitboard = Bitboard::single(sq1) | Bitboard::single(sq2);
+                let result1 = bitboard.pop().unwrap();
+                let result2 = bitboard.pop().unwrap();
+                assert!((result1, result2) == (sq1, sq2) || (result1, result2) == (sq2, sq1));
+                assert!(bitboard.is_empty());
             }
         }
     }
