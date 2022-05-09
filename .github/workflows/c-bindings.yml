@@ -49,6 +49,12 @@ jobs:
           echo '`do_count_chars` or `pad_integral` found in '${SHARED_OBJECT}
           exit 1
         fi
+    - name: Assert that cdylib does not contain the symbol `write_char`
+      run: |
+        if nm ${SHARED_OBJECT} | grep --fixed-strings write_char; [ $? -ne 1 ]; then
+          echo '`write_char` found in '${SHARED_OBJECT}
+          exit 1
+        fi
     - name: Test
       run: make c_tests
     - name: cargo bloat (display, release)

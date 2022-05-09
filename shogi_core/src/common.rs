@@ -11,8 +11,7 @@ pub(crate) fn write_u8<W: core::fmt::Write>(sink: &mut W, value: u8) -> core::fm
         // Safety: b'0' <= value1 + b'0' <= b'9'
         unsafe { write_ascii_byte(sink, value1 + b'0') }?;
         // Safety: b'0' <= value2 + b'0' <= b'9'
-        unsafe { write_ascii_byte(sink, value2 + b'0') }?;
-        return Ok(());
+        return unsafe { write_ascii_byte(sink, value2 + b'0') };
     }
     let value1 = value / 100;
     let value2 = (value / 10) % 10;
@@ -47,6 +46,7 @@ pub(crate) fn write_u16<W: core::fmt::Write>(sink: &mut W, mut value: u16) -> co
 
 /// # Safety
 /// `ascii_byte` must be an ASCII byte, i.e., 0 <= ascii_byte < 128 must hold.
+#[inline(always)]
 pub(crate) unsafe fn write_ascii_byte<W: core::fmt::Write>(
     sink: &mut W,
     ascii_byte: u8,

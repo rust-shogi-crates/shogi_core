@@ -2,7 +2,7 @@ use core::fmt::{Result as FmtResult, Write};
 use core::mem::MaybeUninit;
 
 use crate::c_compat::{OptionCompactMove, OptionPiece};
-use crate::common::write_u16;
+use crate::common::{write_ascii_byte, write_u16, write_u8};
 use crate::{Bitboard, Color, CompactMove, Hand, Move, Piece, PieceKind, Square, ToUsi};
 
 /// A position. It provides sufficient data for legality checking.
@@ -483,7 +483,7 @@ impl PartialPosition {
                 let current: Option<Piece> = current.into();
                 if let Some(occupying) = current {
                     if vacant > 0 {
-                        sink.write_char((b'0' + vacant as u8) as char)?;
+                        write_u8(sink, vacant)?;
                         vacant = 0;
                     }
                     occupying.to_usi(sink)?;
@@ -492,17 +492,21 @@ impl PartialPosition {
                 }
             }
             if vacant > 0 {
-                sink.write_char((b'0' + vacant as u8) as char)?;
+                write_u8(sink, vacant)?;
             }
             if i < 8 {
-                sink.write_char('/')?;
+                // Safety: '/' is in ASCII
+                unsafe { write_ascii_byte(sink, b'/') }?;
             }
         }
-        sink.write_char(' ')?;
+        // Safety: ' ' is in ASCII
+        unsafe { write_ascii_byte(sink, b' ') }?;
         self.side.to_usi(sink)?;
-        sink.write_char(' ')?;
+        // Safety: ' ' is in ASCII
+        unsafe { write_ascii_byte(sink, b' ') }?;
         self.hands.to_usi(sink)?;
-        sink.write_char(' ')?;
+        // Safety: ' ' is in ASCII
+        unsafe { write_ascii_byte(sink, b' ') }?;
         write_u16(sink, self.ply)?;
         Ok(())
     }
@@ -524,20 +528,25 @@ impl PartialPosition {
     pub unsafe extern "C" fn to_sfen_c(&self, ptr: *mut u8) {
         struct Bridge(*mut u8);
         impl Write for Bridge {
+            #[inline(always)]
             fn write_str(&mut self, s: &str) -> FmtResult {
-                let slice = s.as_bytes();
-                unsafe {
-                    for (i, &byte) in slice.iter().enumerate() {
-                        core::ptr::write(self.0.add(i), byte);
+                fn inner(this: &mut Bridge, s: &str) {
+                    let slice = s.as_bytes();
+                    unsafe {
+                        for (i, &byte) in slice.iter().enumerate() {
+                            core::ptr::write(this.0.add(i), byte);
+                        }
+                        this.0 = this.0.add(slice.len());
                     }
-                    self.0 = self.0.add(slice.len());
                 }
+                inner(self, s);
                 Ok(())
             }
         }
         let mut sink = Bridge(ptr);
         let _ = self.to_sfen(&mut sink);
-        let _ = sink.write_char('\0');
+        // Safety: nul is in ASCII
+        let _ = write_ascii_byte(&mut sink, b'\0');
     }
 }
 

@@ -1,5 +1,6 @@
 use core::num::NonZeroU8;
 
+use crate::common::write_ascii_byte;
 use crate::{Color, PieceKind, ToUsi};
 
 /// A piece + who owns it.
@@ -131,35 +132,38 @@ impl From<OptionPiece> for Option<Piece> {
 impl ToUsi for Piece {
     fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
         let (piece_kind, color) = self.to_parts();
-        match (piece_kind, color) {
-            (PieceKind::Pawn, Color::Black) => sink.write_char('P'),
-            (PieceKind::Pawn, Color::White) => sink.write_char('p'),
-            (PieceKind::Lance, Color::Black) => sink.write_char('L'),
-            (PieceKind::Lance, Color::White) => sink.write_char('l'),
-            (PieceKind::Knight, Color::Black) => sink.write_char('N'),
-            (PieceKind::Knight, Color::White) => sink.write_char('n'),
-            (PieceKind::Silver, Color::Black) => sink.write_char('S'),
-            (PieceKind::Silver, Color::White) => sink.write_char('s'),
-            (PieceKind::Gold, Color::Black) => sink.write_char('G'),
-            (PieceKind::Gold, Color::White) => sink.write_char('g'),
-            (PieceKind::Bishop, Color::Black) => sink.write_char('B'),
-            (PieceKind::Bishop, Color::White) => sink.write_char('b'),
-            (PieceKind::Rook, Color::Black) => sink.write_char('R'),
-            (PieceKind::Rook, Color::White) => sink.write_char('r'),
-            (PieceKind::King, Color::Black) => sink.write_char('K'),
-            (PieceKind::King, Color::White) => sink.write_char('k'),
-            (PieceKind::ProPawn, Color::Black) => sink.write_str("+P"),
-            (PieceKind::ProPawn, Color::White) => sink.write_str("+p"),
-            (PieceKind::ProLance, Color::Black) => sink.write_str("+L"),
-            (PieceKind::ProLance, Color::White) => sink.write_str("+l"),
-            (PieceKind::ProKnight, Color::Black) => sink.write_str("+N"),
-            (PieceKind::ProKnight, Color::White) => sink.write_str("+n"),
-            (PieceKind::ProSilver, Color::Black) => sink.write_str("+S"),
-            (PieceKind::ProSilver, Color::White) => sink.write_str("+s"),
-            (PieceKind::ProBishop, Color::Black) => sink.write_str("+B"),
-            (PieceKind::ProBishop, Color::White) => sink.write_str("+b"),
-            (PieceKind::ProRook, Color::Black) => sink.write_str("+R"),
-            (PieceKind::ProRook, Color::White) => sink.write_str("+r"),
+        // Safety: the written byte is in ASCII for every branch
+        unsafe {
+            match (piece_kind, color) {
+                (PieceKind::Pawn, Color::Black) => write_ascii_byte(sink, b'P'),
+                (PieceKind::Pawn, Color::White) => write_ascii_byte(sink, b'p'),
+                (PieceKind::Lance, Color::Black) => write_ascii_byte(sink, b'L'),
+                (PieceKind::Lance, Color::White) => write_ascii_byte(sink, b'l'),
+                (PieceKind::Knight, Color::Black) => write_ascii_byte(sink, b'N'),
+                (PieceKind::Knight, Color::White) => write_ascii_byte(sink, b'n'),
+                (PieceKind::Silver, Color::Black) => write_ascii_byte(sink, b'S'),
+                (PieceKind::Silver, Color::White) => write_ascii_byte(sink, b's'),
+                (PieceKind::Gold, Color::Black) => write_ascii_byte(sink, b'G'),
+                (PieceKind::Gold, Color::White) => write_ascii_byte(sink, b'g'),
+                (PieceKind::Bishop, Color::Black) => write_ascii_byte(sink, b'B'),
+                (PieceKind::Bishop, Color::White) => write_ascii_byte(sink, b'b'),
+                (PieceKind::Rook, Color::Black) => write_ascii_byte(sink, b'R'),
+                (PieceKind::Rook, Color::White) => write_ascii_byte(sink, b'r'),
+                (PieceKind::King, Color::Black) => write_ascii_byte(sink, b'K'),
+                (PieceKind::King, Color::White) => write_ascii_byte(sink, b'k'),
+                (PieceKind::ProPawn, Color::Black) => sink.write_str("+P"),
+                (PieceKind::ProPawn, Color::White) => sink.write_str("+p"),
+                (PieceKind::ProLance, Color::Black) => sink.write_str("+L"),
+                (PieceKind::ProLance, Color::White) => sink.write_str("+l"),
+                (PieceKind::ProKnight, Color::Black) => sink.write_str("+N"),
+                (PieceKind::ProKnight, Color::White) => sink.write_str("+n"),
+                (PieceKind::ProSilver, Color::Black) => sink.write_str("+S"),
+                (PieceKind::ProSilver, Color::White) => sink.write_str("+s"),
+                (PieceKind::ProBishop, Color::Black) => sink.write_str("+B"),
+                (PieceKind::ProBishop, Color::White) => sink.write_str("+b"),
+                (PieceKind::ProRook, Color::Black) => sink.write_str("+R"),
+                (PieceKind::ProRook, Color::White) => sink.write_str("+r"),
+            }
         }
     }
 }
