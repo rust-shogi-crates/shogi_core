@@ -192,13 +192,19 @@ typedef struct Bitboard {
 /**
  * A square.
  *
- * `Square` and `Option<Square>` are both 1-byte data types.
- * Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+ * [`Square`] and <code>[Option]<[Square]></code> are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`].
  */
 typedef uint8_t Square;
 
 /**
- * <https://github.com/eqrion/cbindgen/issues/326>.
+ * C interface of <code>[Option]<[Square]></code>.
+ *
+ * This type is provided for C interoperability.
+ * cbindgen cannot deduce that <code>[Option]<[Square]></code> can be represented by `uint8_t` in C, so we need to define the bridge type.
+ * Users of this type should convert to/from <code>[Option]<[Square]></code>.
+ *
+ * See: <https://github.com/eqrion/cbindgen/issues/326>.
  */
 typedef uint8_t OptionSquare;
 
@@ -669,7 +675,7 @@ uint8_t Square_file(Square self);
 Square Square_flip(Square self);
 
 /**
- * Converts u8 to `Square`. If `value` is not in range `1..=81`, this function returns `None`.
+ * Converts a [`u8`] to a [`Square`]. If `value` is not in range `1..=81`, this function returns [`None`].
  *
  * Examples:
  * ```
@@ -682,7 +688,7 @@ Square Square_flip(Square self);
 struct Option_Square Square_from_u8(uint8_t value);
 
 /**
- * Converts u8 to `Square` without checking.
+ * Converts [`u8`] to [`Square`] without checking.
  *
  * # Safety
  * `value` must be in range 1..=81
@@ -691,7 +697,7 @@ Square Square_from_u8_unchecked(uint8_t value);
 
 /**
  * Finds the index of `self` in range `1..=81`.
- * It is guaranteed that the result is equal to the internal representation, 9 * file + rank - 9.
+ * It is guaranteed that the result is equal to the internal representation, `9 * file + rank - 9`.
  *
  * Examples:
  * ```
@@ -702,7 +708,7 @@ Square Square_from_u8_unchecked(uint8_t value);
 uint8_t Square_index(Square self);
 
 /**
- * Creates a new `Square` with given `file` and `rank`.
+ * Creates a new [`Square`] with given `file` and `rank`.
  *
  * `file` and `rank` must be between 1 and 9 (both inclusive).
  * If this condition is not met, this function returns None.
@@ -710,7 +716,7 @@ uint8_t Square_index(Square self);
 struct Option_Square Square_new(uint8_t file, uint8_t rank);
 
 /**
- * Creates a new `Square` with given `file`, `rank` and `color`.
+ * Creates a new [`Square`] with given `file`, `rank` and `color`.
  *
  * `file` and `rank` must be between 1 and 9 (both inclusive).
  * If this condition is not met, this function returns None.
@@ -746,7 +752,7 @@ uint8_t Square_relative_file(Square self, Color color);
 uint8_t Square_relative_rank(Square self, Color color);
 
 /**
- * Shifts `self` by the given arguments. If the result would be out of the board, this function returns `None`.
+ * Shifts `self` by the given arguments. If the result would be out of the board, this function returns [`None`].
  *
  * Examples:
  * ```

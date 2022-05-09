@@ -4,8 +4,8 @@ use crate::Color;
 
 /// A square.
 ///
-/// `Square` and `Option<Square>` are both 1-byte data types.
-/// Because they are cheap to copy, they implement [`Copy`](https://doc.rust-lang.org/core/marker/trait.Copy.html).
+/// [`Square`] and <code>[Option]<[Square]></code> are both 1-byte data types.
+/// Because they are cheap to copy, they implement [`Copy`].
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -13,7 +13,7 @@ use crate::Color;
 pub struct Square(NonZeroU8);
 
 impl Square {
-    /// Creates a new `Square` with given `file` and `rank`.
+    /// Creates a new [`Square`] with given `file` and `rank`.
     ///
     /// `file` and `rank` must be between 1 and 9 (both inclusive).
     /// If this condition is not met, this function returns None.
@@ -28,7 +28,7 @@ impl Square {
         }))
     }
 
-    /// Creates a new `Square` with given `file`, `rank` and `color`.
+    /// Creates a new [`Square`] with given `file`, `rank` and `color`.
     ///
     /// `file` and `rank` must be between 1 and 9 (both inclusive).
     /// If this condition is not met, this function returns None.
@@ -79,7 +79,7 @@ impl Square {
     }
 
     /// Finds the index of `self` in range `1..=81`.
-    /// It is guaranteed that the result is equal to the internal representation, 9 * file + rank - 9.
+    /// It is guaranteed that the result is equal to the internal representation, `9 * file + rank - 9`.
     ///
     /// Examples:
     /// ```
@@ -126,7 +126,7 @@ impl Square {
         unsafe { Self::from_u8_unchecked(82 - self.0.get()) }
     }
 
-    /// Converts u8 to `Square`. If `value` is not in range `1..=81`, this function returns `None`.
+    /// Converts a [`u8`] to a [`Square`]. If `value` is not in range `1..=81`, this function returns [`None`].
     ///
     /// Examples:
     /// ```
@@ -150,7 +150,7 @@ impl Square {
         }
     }
 
-    /// Converts u8 to `Square` without checking.
+    /// Converts [`u8`] to [`Square`] without checking.
     ///
     /// # Safety
     /// `value` must be in range 1..=81
@@ -160,7 +160,7 @@ impl Square {
         Self(NonZeroU8::new_unchecked(value))
     }
 
-    /// Shifts `self` by the given arguments. If the result would be out of the board, this function returns `None`.
+    /// Shifts `self` by the given arguments. If the result would be out of the board, this function returns [`None`].
     ///
     /// Examples:
     /// ```
@@ -180,14 +180,26 @@ impl Square {
         Some(unsafe { Self::from_u8_unchecked((file_m1 * 9 + rank_m1 + 1) as u8) })
     }
 
-    /// Returns an iterator that iterates over all possible `Square`s
+    /// Returns an iterator that iterates over all possible [`Square`]s
     /// in the ascending order of their indices.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::Square;
+    /// assert_eq!(Square::all().count(), 81);
+    /// ```
     pub fn all() -> impl core::iter::Iterator<Item = Self> {
         (1..=81).map(|index| unsafe { Self::from_u8_unchecked(index) })
     }
 }
 
-/// <https://github.com/eqrion/cbindgen/issues/326>.
+/// C interface of <code>[Option]<[Square]></code>.
+///
+/// This type is provided for C interoperability.
+/// cbindgen cannot deduce that <code>[Option]<[Square]></code> can be represented by `uint8_t` in C, so we need to define the bridge type.
+/// Users of this type should convert to/from <code>[Option]<[Square]></code>.
+///
+/// See: <https://github.com/eqrion/cbindgen/issues/326>.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -205,6 +217,7 @@ impl From<Option<Square>> for OptionSquare {
 }
 
 impl From<OptionSquare> for Option<Square> {
+    #[inline(always)]
     fn from(arg: OptionSquare) -> Self {
         Some(Square(NonZeroU8::new(arg.0)?))
     }
