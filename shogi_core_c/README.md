@@ -11,3 +11,7 @@ If the `rlib` crate also had `crate_type = "cdylib"`, the `rlib` crate would def
 
 ## Size of the artifact
 For x86_64-unknown-linux-gnu, the resulting shared object's size does not exceed 40KiB.
+
+## Available features
+- `alloc`: `alloc`-related features are available.
+- `std`: `std`-related features are available. Implies `alloc`.

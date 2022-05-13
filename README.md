@@ -7,3 +7,9 @@
 This repository defines fundamental data types and functions. It contains two crates: a library crate that defines items (`rlib` crate), and a library crate that defines C bindings to them (`cdylib` crate).
 
 Crates in this repository do not require the standard library (i.e., can be used by `no_std` crates) and suitable for embedded systems.
+
+## Available features
+- `alloc`: `alloc`-related features are available.
+- `std`: `std`-related features are available. Implies `alloc`.
+- `hash`: implements [`Hash`](https://doc.rust-lang.org/core/hash/trait.Hash.html) for every type it exports.
+- `ord`: implements [`PartialOrd`](https://doc.rust-lang.org/core/cmp/trait.PartialOrd.html) and [`Ord`](https://doc.rust-lang.org/core/cmp/trait.Ord.html) for every type it exports.

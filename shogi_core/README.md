@@ -9,3 +9,9 @@ The documentation of this crate may be used for the reference of detailed rules 
 
 ## Panicking
 Functions in this crate does not panic.
+
+## Available features
+- `alloc`: `alloc`-related features are available.
+- `std`: `std`-related features are available. Implies `alloc`.
+- `hash`: implements [`Hash`](https://doc.rust-lang.org/core/hash/trait.Hash.html) for every type it exports.
+- `ord`: implements [`PartialOrd`](https://doc.rust-lang.org/core/cmp/trait.PartialOrd.html) and [`Ord`](https://doc.rust-lang.org/core/cmp/trait.Ord.html) for every type it exports.
