@@ -294,6 +294,18 @@ typedef struct PartialPosition {
  */
 typedef uint8_t OptionPieceKind;
 
+struct Bitboard Bitboard_bitand(struct Bitboard a, struct Bitboard b);
+
+void Bitboard_bitand_assign(struct Bitboard *a, struct Bitboard b);
+
+struct Bitboard Bitboard_bitor(struct Bitboard a, struct Bitboard b);
+
+void Bitboard_bitor_assign(struct Bitboard *a, struct Bitboard b);
+
+struct Bitboard Bitboard_bitxor(struct Bitboard a, struct Bitboard b);
+
+void Bitboard_bitxor_assign(struct Bitboard *a, struct Bitboard b);
+
 /**
  * Finds if `self` as a subset contains a [`Square`].
  *
