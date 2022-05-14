@@ -33,6 +33,100 @@ enum Color {
 typedef uint8_t Color;
 
 /**
+ * How a game is resolved.
+ *
+ * [`GameResolution`] and <code>[Option]<[GameResolution]></code> are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`].
+ */
+enum GameResolution {
+  /**
+   * White's king was mated or white resigned.
+   *
+   * Discriminant = 1.
+   */
+  BlackWins = 1,
+  /**
+   * Black's king was mated or black resigned.
+   *
+   * Discriminant = 2.
+   */
+  WhiteWins = 2,
+  /**
+   * This can happen if e.g. `持将棋` (*jishōgi*) happens.
+   *
+   * Discriminant = 3.
+   */
+  Draw = 3,
+  /**
+   * This can happen if e.g. `千日手` (*sennichite*, repetition) happens.
+   *
+   * Discriminant = 4.
+   */
+  Rematch = 4,
+  /**
+   * The game was aborted.
+   *
+   * Discriminant = 5.
+   */
+  Aborted = 5,
+};
+typedef uint8_t GameResolution;
+
+/**
+ * Kinds of illegal moves.
+ *
+ * [`IllegalMoveKind`] and <code>[Result]<[()][unit], [IllegalMoveKind]></code> are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`].
+ *
+ * Note: the equality of sizes are not guaranteed, but assumed to be correct.
+ */
+enum IllegalMoveKind {
+  /**
+   * A player has two pawns in the same file. Promoted pawns are not counted.
+   *
+   * Discriminant = 1.
+   */
+  TwoPawns = 1,
+  /**
+   * A player ignored a check.
+   *
+   * Discriminant = 2.
+   */
+  IgnoredCheck = 2,
+  /**
+   * A drop-pawn-mate (`打ち歩詰め`, *uchifu-zume*).
+   *
+   * Discriminant = 3.
+   */
+  DropPawnMate = 3,
+  /**
+   * A drop move is stuck.
+   *
+   * Discriminant = 4.
+   */
+  DropStuck = 4,
+  /**
+   * A normal move is stuck.
+   *
+   * Discriminant = 5.
+   */
+  NormalStuck = 5,
+  /**
+   * A player made a move even after the game finished.
+   *
+   * Discriminant = 6.
+   */
+  GameFinished = 6,
+  /**
+   * Incorrect move.
+   *
+   * Discriminant = 7.
+   */
+  IncorrectMove = 7,
+};
+typedef uint8_t IllegalMoveKind;
+
+/**
  * Kinds of pieces.
  *
  * [`PieceKind`] and <code>[Option]<[PieceKind]></code> are both 1-byte data types.
@@ -168,7 +262,13 @@ enum PieceKind {
 };
 typedef uint8_t PieceKind;
 
+#if defined(DEFINE_ALLOC)
+typedef struct Game Game;
+#endif
+
 typedef struct Option_Square Option_Square;
+
+typedef struct PartialGame PartialGame;
 
 #if defined(DEFINE_ALLOC)
 /**
@@ -232,6 +332,21 @@ typedef uint16_t CompactMove;
  * ```
  */
 typedef uint8_t Piece;
+
+/**
+ * <code>[Option]<[GameResolution]></code> with defined representation.
+ *
+ * The representation is:
+ * [`None`] => `0`, <code>[Some]\(x\)</code> => `x`.
+ * Therefore, valid representations of this type are precisely `0..=5`.
+ *
+ * This type is provided for C interoperability.
+ * cbindgen cannot deduce that <code>[Option]<[GameResolution]></code> can be represented by `uint8_t` in C, so we need to define the bridge type.
+ * Users of this type should convert to/from <code>[Option]<[GameResolution]></code>.
+ *
+ * See: <https://github.com/eqrion/cbindgen/issues/326>.
+ */
+typedef uint8_t OptionGameResolution;
 
 /**
  * A hand of a single player. A hand is a multiset of unpromoted pieces (except a king).
@@ -458,6 +573,35 @@ CompactMove CompactMove_normal(Square from,
 Square CompactMove_to(CompactMove self);
 
 /**
+ * Converts a [`u8`] to [`GameResolution`] without checking.
+ *
+ * # Safety
+ * `repr` must be a valid representation of [`GameResolution`].
+ * This condition is equivalent to `1 <= repr && repr <= 5`.
+ */
+GameResolution GameResolution_from_u8_unchecked(uint8_t repr);
+
+/**
+ * Returns the inner position.
+ */
+const struct Position *Game_position(const struct Game *self);
+
+/**
+ * C interface to [`Game::resolution`].
+ */
+OptionGameResolution Game_resolution(const struct Game *self);
+
+/**
+ * Sets the resolution of this game.
+ */
+void Game_resolve(struct Game *self, GameResolution resolution);
+
+/**
+ * Unsets the resolution of this game.
+ */
+void Game_unresolve(struct Game *self);
+
+/**
  * C interface of [`Hand::added`].
  *
  * This function returns true if and only if adding was successful.
@@ -488,6 +632,35 @@ struct Hand Hand_new(void);
  * This function returns true if and only if removal was successful.
  */
 bool Hand_remove(struct Hand *self, PieceKind piece_kind);
+
+/**
+ * Converts a [`u8`] to [`IllegalMoveKind`] without checking.
+ *
+ * # Safety
+ * `repr` must be a valid representation of [`IllegalMoveKind`].
+ * This condition is equivalent to `1 <= repr && repr <= 7`.
+ */
+IllegalMoveKind IllegalMoveKind_from_u8_unchecked(uint8_t repr);
+
+/**
+ * Returns the inner position.
+ */
+const struct PartialPosition *PartialGame_position(const struct PartialGame *self);
+
+/**
+ * C interface to [`Game::resolution`].
+ */
+OptionGameResolution PartialGame_resolution(const struct PartialGame *self);
+
+/**
+ * Sets the resolution of this game.
+ */
+void PartialGame_resolve(struct PartialGame *self, GameResolution resolution);
+
+/**
+ * Unsets the resolution of this game.
+ */
+void PartialGame_unresolve(struct PartialGame *self);
 
 struct Hand PartialPosition_hand_of_a_player(const struct PartialPosition *self, Color color);
 

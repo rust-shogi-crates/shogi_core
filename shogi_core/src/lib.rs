@@ -7,7 +7,9 @@ extern crate alloc;
 mod bitboard;
 mod color;
 mod common;
+mod game_resolution;
 mod hand;
+mod illegal_move_kind;
 mod legality;
 mod mv;
 mod piece;
@@ -44,14 +46,20 @@ pub use crate::hand::Hand;
 pub use crate::bitboard::Bitboard;
 
 #[doc(inline)]
-pub use crate::position::PartialPosition;
+pub use crate::game_resolution::GameResolution;
+
+#[doc(inline)]
+pub use crate::position::{PartialGame, PartialPosition};
 
 #[cfg(feature = "alloc")]
 #[doc(inline)]
-pub use crate::position::Position;
+pub use crate::position::{Game, Position};
 
 #[doc(inline)]
-pub use crate::legality::{GameStatus, LegalityChecker};
+pub use crate::illegal_move_kind::IllegalMoveKind;
+
+#[doc(inline)]
+pub use crate::legality::{LegalityChecker, PositionStatus};
 
 /// Types that are exposed to C.
 pub mod c_compat {
@@ -66,6 +74,12 @@ pub mod c_compat {
 
     #[doc(inline)]
     pub use crate::mv::OptionCompactMove;
+
+    #[doc(inline)]
+    pub use crate::game_resolution::OptionGameResolution;
+
+    #[doc(inline)]
+    pub use crate::illegal_move_kind::ResultUnitIllegalMoveKind;
 }
 
 #[cfg(test)]
@@ -80,5 +94,21 @@ mod tests {
         assert_eq!(size_of::<Option<Square>>(), size_of::<Square>());
         assert_eq!(size_of::<Option<PieceKind>>(), size_of::<PieceKind>());
         assert_eq!(size_of::<Option<Piece>>(), size_of::<Piece>());
+        assert_eq!(
+            size_of::<Option<GameResolution>>(),
+            size_of::<GameResolution>(),
+        );
+        assert_eq!(
+            size_of::<Option<PartialPosition>>(),
+            size_of::<PartialPosition>(),
+        );
+        assert_eq!(
+            size_of::<Option<PositionStatus>>(),
+            size_of::<PositionStatus>(),
+        );
+        assert_eq!(
+            size_of::<Result<(), IllegalMoveKind>>(),
+            size_of::<IllegalMoveKind>(),
+        );
     }
 }

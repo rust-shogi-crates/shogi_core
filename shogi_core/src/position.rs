@@ -1,13 +1,87 @@
 use core::fmt::{Result as FmtResult, Write};
 use core::mem::MaybeUninit;
 
-use crate::c_compat::{OptionCompactMove, OptionPiece};
+use crate::c_compat::{OptionCompactMove, OptionGameResolution, OptionPiece};
 use crate::common::{write_ascii_byte, write_u16, write_u8};
-use crate::{Bitboard, Color, CompactMove, Hand, Move, Piece, PieceKind, Square, ToUsi};
+use crate::{
+    Bitboard, Color, CompactMove, GameResolution, Hand, Move, Piece, PieceKind, Square, ToUsi,
+};
+
+#[cfg(feature = "alloc")]
+#[derive(Eq, PartialEq, Clone, Debug, Default)]
+#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
+#[cfg_attr(feature = "hash", derive(Hash))]
+pub struct Game {
+    inner: Position,
+    resolution: OptionGameResolution,
+}
+
+#[cfg(feature = "alloc")]
+impl Game {
+    /// Returns the inner position.
+    #[export_name = "Game_position"]
+    pub extern "C" fn position(&self) -> &Position {
+        &self.inner
+    }
+    /// Sets the resolution of this game.
+    #[export_name = "Game_resolve"]
+    pub extern "C" fn resolve(&mut self, resolution: GameResolution) {
+        self.resolution = Some(resolution).into();
+    }
+    /// Unsets the resolution of this game.
+    #[export_name = "Game_unresolve"]
+    pub extern "C" fn unresolve(&mut self) {
+        self.resolution = None.into();
+    }
+    /// Returns the resolution of this game.
+    pub fn resolution(&self) -> Option<GameResolution> {
+        self.resolution.into()
+    }
+    /// C interface to [`Game::resolution`].
+    #[no_mangle]
+    pub extern "C" fn Game_resolution(&self) -> OptionGameResolution {
+        self.resolution
+    }
+}
+
+#[derive(Eq, PartialEq, Clone, Debug, Default)]
+#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
+#[cfg_attr(feature = "hash", derive(Hash))]
+pub struct PartialGame {
+    inner: PartialPosition,
+    resolution: OptionGameResolution,
+}
+
+impl PartialGame {
+    /// Returns the inner position.
+    #[export_name = "PartialGame_position"]
+    pub extern "C" fn position(&self) -> &PartialPosition {
+        &self.inner
+    }
+    /// Sets the resolution of this game.
+    #[export_name = "PartialGame_resolve"]
+    pub extern "C" fn resolve(&mut self, resolution: GameResolution) {
+        self.resolution = Some(resolution).into();
+    }
+    /// Unsets the resolution of this game.
+    #[export_name = "PartialGame_unresolve"]
+    pub extern "C" fn unresolve(&mut self) {
+        self.resolution = None.into();
+    }
+    /// Returns the resolution of this game.
+    pub fn resolution(&self) -> Option<GameResolution> {
+        self.resolution.into()
+    }
+    /// C interface to [`Game::resolution`].
+    #[no_mangle]
+    pub extern "C" fn PartialGame_resolution(&self) -> OptionGameResolution {
+        self.resolution
+    }
+}
 
 /// A position. It provides sufficient data for legality checking.
 #[cfg(feature = "alloc")]
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, PartialEq, Clone, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Position {
