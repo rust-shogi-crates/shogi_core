@@ -8,7 +8,7 @@
 このリポジトリに含まれているクレイトは標準ライブラリを要求しません。つまり、`no_std` クレイトから使用可能です。組み込みシステムに適しており、もちろん普通のアプリケーションにも適しています。
 
 ## 利用可能なフィーチャ
-- `alloc`: `alloc` 関連のフィーチャが利用可能になります。デフォルトで有効化されています。
-- `std`: `std` 関連のフィーチャが利用可能になります。有効化すると `alloc` も有効化されます。デフォルトで有効化されています。
+- `alloc`: `alloc` 関連の機能が利用可能になります。デフォルトで有効化されています。
+- `std`: `std` 関連の機能が利用可能になります。有効化すると `alloc` も有効化されます。デフォルトで有効化されています。
 - `hash`: エクスポートするすべての型に [`Hash`](https://doc.rust-lang.org/core/hash/trait.Hash.html) を実装します。
 - `ord`: エクスポートするすべての型に [`PartialOrd`](https://doc.rust-lang.org/core/cmp/trait.PartialOrd.html) と [`Ord`](https://doc.rust-lang.org/core/cmp/trait.Ord.html) を実装します。
