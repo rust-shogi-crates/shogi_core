@@ -40,6 +40,19 @@ pub enum IllegalMoveKind {
 }
 
 impl IllegalMoveKind {
+    /// Converts a [`u8`] to [`IllegalMoveKind`] if possible.
+    ///
+    /// If `repr` is a valid representation of [`IllegalMoveKind`], this function returns `Some(illegal_move_kind)`.
+    /// This condition is equivalent to `1 <= repr && repr <= 7`.
+    pub fn from_u8(repr: u8) -> Option<Self> {
+        if matches!(repr, 1..=7) {
+            // Safety: `repr` is in range `1..=7`.
+            Some(unsafe { Self::from_u8_unchecked(repr) })
+        } else {
+            None
+        }
+    }
+
     /// Converts a [`u8`] to [`IllegalMoveKind`] without checking.
     ///
     /// # Safety
@@ -104,5 +117,13 @@ mod tests {
     fn option_illegal_move_kind_default_is_compatible() {
         // Option<T>'s default value is [`None`].
         assert_eq!(ResultUnitIllegalMoveKind::default(), None.into());
+    }
+
+    #[test]
+    fn repr_is_correct() {
+        for repr in 1..=7 {
+            let value = IllegalMoveKind::from_u8(repr).unwrap();
+            assert_eq!(value as u8, repr);
+        }
     }
 }
