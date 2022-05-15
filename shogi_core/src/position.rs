@@ -7,6 +7,7 @@ use crate::{
     Bitboard, Color, CompactMove, GameResolution, Hand, Move, Piece, PieceKind, Square, ToUsi,
 };
 
+/// A record of a game. A position and how a game is resolved.
 #[cfg(feature = "alloc")]
 #[derive(Eq, PartialEq, Clone, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
@@ -20,20 +21,24 @@ pub struct Game {
 impl Game {
     /// Returns the inner position.
     #[export_name = "Game_position"]
+    #[inline(always)]
     pub extern "C" fn position(&self) -> &Position {
         &self.inner
     }
     /// Sets the resolution of this game.
     #[export_name = "Game_resolve"]
+    #[inline(always)]
     pub extern "C" fn resolve(&mut self, resolution: GameResolution) {
         self.resolution = Some(resolution).into();
     }
     /// Unsets the resolution of this game.
     #[export_name = "Game_unresolve"]
+    #[inline(always)]
     pub extern "C" fn unresolve(&mut self) {
         self.resolution = None.into();
     }
     /// Returns the resolution of this game.
+    #[inline(always)]
     pub fn resolution(&self) -> Option<GameResolution> {
         self.resolution.into()
     }
@@ -44,6 +49,7 @@ impl Game {
     }
 }
 
+/// A record of a game. A position and how a game is resolved.
 #[derive(Eq, PartialEq, Clone, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
@@ -55,24 +61,28 @@ pub struct PartialGame {
 impl PartialGame {
     /// Returns the inner position.
     #[export_name = "PartialGame_position"]
+    #[inline(always)]
     pub extern "C" fn position(&self) -> &PartialPosition {
         &self.inner
     }
     /// Sets the resolution of this game.
     #[export_name = "PartialGame_resolve"]
+    #[inline(always)]
     pub extern "C" fn resolve(&mut self, resolution: GameResolution) {
         self.resolution = Some(resolution).into();
     }
     /// Unsets the resolution of this game.
     #[export_name = "PartialGame_unresolve"]
+    #[inline(always)]
     pub extern "C" fn unresolve(&mut self) {
         self.resolution = None.into();
     }
     /// Returns the resolution of this game.
+    #[inline(always)]
     pub fn resolution(&self) -> Option<GameResolution> {
         self.resolution.into()
     }
-    /// C interface to [`Game::resolution`].
+    /// C interface to [`PartialGame::resolution`].
     #[no_mangle]
     pub extern "C" fn PartialGame_resolution(&self) -> OptionGameResolution {
         self.resolution
@@ -92,29 +102,32 @@ pub struct Position {
 
 #[cfg(feature = "alloc")]
 impl Position {
-    /// Returns the inner `PartialPosition`.
+    /// Returns the inner [`PartialPosition`].
     #[export_name = "Position_inner"]
+    #[inline(always)]
     pub extern "C" fn inner(&self) -> &PartialPosition {
         &self.inner
     }
 
-    /// Returns the initial position of [Position], i.e., the position before any moves given to it.
+    /// Returns the initial position of [`Position`], i.e., the position before any moves given to it.
     #[export_name = "Position_initial_position"]
+    #[inline(always)]
     pub extern "C" fn initial_position(&self) -> &PartialPosition {
         &self.initial
     }
 
+    /// Creates a [`Position`] with the starting position of shogi.
     pub fn startpos() -> Self {
         Self::arbitrary_position(PartialPosition::startpos())
     }
 
-    /// C interface of `startpos`.
+    /// C interface of [`Position::startpos`].
     #[no_mangle]
     pub extern "C" fn Position_startpos() -> *mut Self {
         alloc::boxed::Box::leak(alloc::boxed::Box::new(Self::startpos()))
     }
 
-    /// Destructs a `Position`.
+    /// Destructs a [`Position`].
     ///
     /// # Safety
     /// `ptr` must be the one created by a function in this type.
@@ -123,6 +136,7 @@ impl Position {
         drop(alloc::boxed::Box::from_raw(ptr));
     }
 
+    /// Creates a [`Position`] with its initial position `p`.
     pub fn arbitrary_position(p: PartialPosition) -> Self {
         Self {
             initial: p.clone(),
@@ -132,11 +146,21 @@ impl Position {
     }
 
     /// Finds which player is to move.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, Move, Position, Square};
+    /// let mut pos = Position::startpos();
+    /// assert_eq!(pos.side_to_move(), Color::Black);
+    /// pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+    /// assert_eq!(pos.side_to_move(), Color::White);
+    /// ```
     #[export_name = "Position_side_to_move"]
     pub extern "C" fn side_to_move(&self) -> Color {
         self.inner.side_to_move()
     }
 
+    /// Returns the [`Hand`] of a player.
     #[export_name = "Position_hand_of_a_player"]
     pub extern "C" fn hand_of_a_player(&self, color: Color) -> Hand {
         self.inner.hand_of_a_player(color)
@@ -150,6 +174,9 @@ impl Position {
         self.inner.hand_of_a_player_mut(color)
     }
 
+    /// Returns how many pieces of `piece` are in hand.
+    ///
+    /// If `piece` is not a valid piece in hand, this method returns [`None`].
     pub fn hand(&self, piece: Piece) -> Option<u8> {
         self.inner.hand(piece)
     }
@@ -160,10 +187,22 @@ impl Position {
         self.inner.ply()
     }
 
+    /// Returns the [`Piece`] on the designated [`Square`].
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, Piece, PieceKind, Position, Square};
+    /// let pos = Position::startpos();
+    /// let black_rook = pos.piece_at(Square::new(2, 8).unwrap());
+    /// assert_eq!(black_rook, Some(Piece::new(PieceKind::Rook, Color::Black)));
+    /// let vacant = pos.piece_at(Square::new(3, 8).unwrap());
+    /// assert_eq!(vacant, None);
+    /// ```
     pub fn piece_at(&self, square: Square) -> Option<Piece> {
         self.inner.piece_at(square)
     }
 
+    /// C interface to [`Position::piece_at`].
     #[no_mangle]
     pub extern "C" fn Position_piece_at(&self, square: Square) -> OptionPiece {
         self.inner.PartialPosition_piece_at(square)
@@ -190,6 +229,16 @@ impl Position {
     }
 
     /// Finds the subset of squares where a piece is placed.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Bitboard, Color, Piece, PieceKind, Position, Square};
+    /// let pos = Position::startpos();
+    /// let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+    /// assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+    /// let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+    /// assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+    /// ```
     #[export_name = "Position_piece_bitboard"]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
         self.inner.piece_bitboard(piece)
@@ -217,6 +266,7 @@ impl Position {
         self.inner.last_compact_move()
     }
 
+    /// C interface to [`Position::last_compact_move`].
     #[no_mangle]
     pub extern "C" fn Position_last_compact_move(&self) -> OptionCompactMove {
         self.inner.PartialPosition_last_compact_move()
@@ -251,6 +301,17 @@ impl Position {
     // TODO: fn revert_move(&mut self) -> Option<Move>
 
     /// Returns the SFEN representation of the current position.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::Position;
+    /// let pos = Position::startpos();
+    /// let s = pos.to_sfen_owned();
+    /// assert_eq!(
+    ///     s,
+    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL B - 1",
+    /// );
+    ///```
     pub fn to_sfen_owned(&self) -> alloc::string::String {
         self.inner.to_sfen_owned()
     }
@@ -342,6 +403,15 @@ impl PartialPosition {
     }
 
     /// Finds which player is to move.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, Move, PartialPosition, Square};
+    /// let mut pos = PartialPosition::startpos();
+    /// assert_eq!(pos.side_to_move(), Color::Black);
+    /// pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+    /// assert_eq!(pos.side_to_move(), Color::White);
+    /// ```
     #[export_name = "PartialPosition_side_to_move"]
     pub extern "C" fn side_to_move(&self) -> Color {
         self.side
@@ -352,6 +422,7 @@ impl PartialPosition {
         self.side = side;
     }
 
+    /// Returns the [`Hand`] of a player.
     #[export_name = "PartialPosition_hand_of_a_player"]
     pub extern "C" fn hand_of_a_player(&self, color: Color) -> Hand {
         // Safety: color as usize is either 1 or 2
@@ -367,6 +438,9 @@ impl PartialPosition {
         unsafe { self.hands.get_unchecked_mut((color as u8 - 1) as usize) }
     }
 
+    /// Returns how many pieces of `piece` are in hand.
+    ///
+    /// If `piece` is not a valid piece in hand, this method returns [`None`].
     pub fn hand(&self, piece: Piece) -> Option<u8> {
         let hand = self.hand_of_a_player(piece.color());
         hand.count(piece.piece_kind())
@@ -390,10 +464,22 @@ impl PartialPosition {
         true
     }
 
+    /// Returns the [`Piece`] on the designated [`Square`].
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, PartialPosition, Piece, PieceKind, Square};
+    /// let pos = PartialPosition::startpos();
+    /// let black_rook = pos.piece_at(Square::new(2, 8).unwrap());
+    /// assert_eq!(black_rook, Some(Piece::new(PieceKind::Rook, Color::Black)));
+    /// let vacant = pos.piece_at(Square::new(3, 8).unwrap());
+    /// assert_eq!(vacant, None);
+    /// ```
     pub fn piece_at(&self, square: Square) -> Option<Piece> {
         self.PartialPosition_piece_at(square).into()
     }
 
+    /// C interface to [`PartialPosition::piece_at`].
     #[no_mangle]
     pub extern "C" fn PartialPosition_piece_at(&self, square: Square) -> OptionPiece {
         let index = square.index() - 1;
@@ -442,6 +528,16 @@ impl PartialPosition {
     }
 
     /// Finds the subset of squares where a piece is placed.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Bitboard, Color, PartialPosition, Piece, PieceKind, Square};
+    /// let pos = PartialPosition::startpos();
+    /// let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+    /// assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+    /// let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+    /// assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+    /// ```
     #[export_name = "PartialPosition_piece_bitboard"]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
         // TODO: optimize to allow O(1)-time retrieval
@@ -477,6 +573,7 @@ impl PartialPosition {
         self.last_move.into()
     }
 
+    /// C interface to [`PartialPosition::last_compact_move`].
     #[no_mangle]
     pub extern "C" fn PartialPosition_last_compact_move(&self) -> OptionCompactMove {
         self.last_move
@@ -586,6 +683,17 @@ impl PartialPosition {
     }
 
     /// Returns the SFEN representation of the current position.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::PartialPosition;
+    /// let pos = PartialPosition::startpos();
+    /// let s = pos.to_sfen_owned();
+    /// assert_eq!(
+    ///     s,
+    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL B - 1",
+    /// );
+    ///```
     #[cfg(feature = "alloc")]
     pub fn to_sfen_owned(&self) -> alloc::string::String {
         let mut s = alloc::string::String::new();

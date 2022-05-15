@@ -263,11 +263,17 @@ enum PieceKind {
 typedef uint8_t PieceKind;
 
 #if defined(DEFINE_ALLOC)
+/**
+ * A record of a game. A position and how a game is resolved.
+ */
 typedef struct Game Game;
 #endif
 
 typedef struct Option_Square Option_Square;
 
+/**
+ * A record of a game. A position and how a game is resolved.
+ */
 typedef struct PartialGame PartialGame;
 
 #if defined(DEFINE_ALLOC)
@@ -648,7 +654,7 @@ IllegalMoveKind IllegalMoveKind_from_u8_unchecked(uint8_t repr);
 const struct PartialPosition *PartialGame_position(const struct PartialGame *self);
 
 /**
- * C interface to [`Game::resolution`].
+ * C interface to [`PartialGame::resolution`].
  */
 OptionGameResolution PartialGame_resolution(const struct PartialGame *self);
 
@@ -662,8 +668,14 @@ void PartialGame_resolve(struct PartialGame *self, GameResolution resolution);
  */
 void PartialGame_unresolve(struct PartialGame *self);
 
+/**
+ * Returns the [`Hand`] of a player.
+ */
 struct Hand PartialPosition_hand_of_a_player(const struct PartialPosition *self, Color color);
 
+/**
+ * C interface to [`PartialPosition::last_compact_move`].
+ */
 OptionCompactMove PartialPosition_last_compact_move(const struct PartialPosition *self);
 
 /**
@@ -677,10 +689,23 @@ OptionCompactMove PartialPosition_last_compact_move(const struct PartialPosition
  */
 bool PartialPosition_make_compact_move(struct PartialPosition *self, CompactMove mv);
 
+/**
+ * C interface to [`PartialPosition::piece_at`].
+ */
 OptionPiece PartialPosition_piece_at(const struct PartialPosition *self, Square square);
 
 /**
  * Finds the subset of squares where a piece is placed.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Bitboard, Color, PartialPosition, Piece, PieceKind, Square};
+ * let pos = PartialPosition::startpos();
+ * let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+ * assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+ * let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+ * assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+ * ```
  */
 struct Bitboard PartialPosition_piece_bitboard(const struct PartialPosition *self, Piece piece);
 
@@ -696,6 +721,15 @@ uint16_t PartialPosition_ply(const struct PartialPosition *self);
 
 /**
  * Finds which player is to move.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Color, Move, PartialPosition, Square};
+ * let mut pos = PartialPosition::startpos();
+ * assert_eq!(pos.side_to_move(), Color::Black);
+ * pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+ * assert_eq!(pos.side_to_move(), Color::White);
+ * ```
  */
 Color PartialPosition_side_to_move(const struct PartialPosition *self);
 
@@ -768,25 +802,31 @@ OptionPiece Piece_promote(Piece self);
 OptionPiece Piece_unpromote(Piece self);
 
 /**
- * Destructs a `Position`.
+ * Destructs a [`Position`].
  *
  * # Safety
  * `ptr` must be the one created by a function in this type.
  */
 void Position_destruct(struct Position *ptr);
 
+/**
+ * Returns the [`Hand`] of a player.
+ */
 struct Hand Position_hand_of_a_player(const struct Position *self, Color color);
 
 /**
- * Returns the initial position of [Position], i.e., the position before any moves given to it.
+ * Returns the initial position of [`Position`], i.e., the position before any moves given to it.
  */
 const struct PartialPosition *Position_initial_position(const struct Position *self);
 
 /**
- * Returns the inner `PartialPosition`.
+ * Returns the inner [`PartialPosition`].
  */
 const struct PartialPosition *Position_inner(const struct Position *self);
 
+/**
+ * C interface to [`Position::last_compact_move`].
+ */
 OptionCompactMove Position_last_compact_move(const struct Position *self);
 
 /**
@@ -800,10 +840,23 @@ OptionCompactMove Position_last_compact_move(const struct Position *self);
  */
 bool Position_make_compact_move(struct Position *self, CompactMove mv);
 
+/**
+ * C interface to [`Position::piece_at`].
+ */
 OptionPiece Position_piece_at(const struct Position *self, Square square);
 
 /**
  * Finds the subset of squares where a piece is placed.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Bitboard, Color, Piece, PieceKind, Position, Square};
+ * let pos = Position::startpos();
+ * let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+ * assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+ * let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+ * assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+ * ```
  */
 struct Bitboard Position_piece_bitboard(const struct Position *self, Piece piece);
 
@@ -819,11 +872,20 @@ uint16_t Position_ply(const struct Position *self);
 
 /**
  * Finds which player is to move.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Color, Move, Position, Square};
+ * let mut pos = Position::startpos();
+ * assert_eq!(pos.side_to_move(), Color::Black);
+ * pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+ * assert_eq!(pos.side_to_move(), Color::White);
+ * ```
  */
 Color Position_side_to_move(const struct Position *self);
 
 /**
- * C interface of `startpos`.
+ * C interface of [`Position::startpos`].
  */
 struct Position *Position_startpos(void);
 
