@@ -309,7 +309,7 @@ impl Position {
     /// let s = pos.to_sfen_owned();
     /// assert_eq!(
     ///     s,
-    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL B - 1",
+    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
     /// );
     ///```
     pub fn to_sfen_owned(&self) -> alloc::string::String {
@@ -691,7 +691,7 @@ impl PartialPosition {
     /// let s = pos.to_sfen_owned();
     /// assert_eq!(
     ///     s,
-    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL B - 1",
+    ///     "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
     /// );
     ///```
     #[cfg(feature = "alloc")]
@@ -752,6 +752,10 @@ mod tests {
         }); // 7g7f
         assert_eq!(result, Some(()));
         assert_eq!(s.side_to_move(), Color::White);
+        assert_eq!(
+            s.to_sfen_owned(),
+            "lnsgkgsnl/1r5b1/ppppppppp/9/9/2P6/PP1PPPPPP/1B5R1/LNSGKGSNL w - 2",
+        );
 
         s.make_move(Move::Normal {
             from: Square::new(3, 3).unwrap(),
@@ -775,7 +779,7 @@ mod tests {
         assert_eq!(s.hand(Piece::new(PieceKind::Bishop, Color::White)), Some(1));
         assert_eq!(
             s.to_sfen_owned(),
-            "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL B Bb 5",
+            "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 5",
         );
     }
     #[test]
@@ -784,7 +788,7 @@ mod tests {
         let s = pos.to_sfen_owned();
         assert_eq!(
             s,
-            "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL B - 1",
+            "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1",
         );
     }
 }
