@@ -9,8 +9,8 @@ documentation = "https://docs.rs/shogi_core"
 readme = "README.md"
 repository = "https://github.com/rust-shogi-crates/shogi_core/tree/main/shogi_core"
 license = "MIT"
-keywords = ["shogi"]
-categories = ["game", "no-std"]
+keywords = ["shogi", "engine"]
+categories = ["games", "game-engines", "game-development", "no-std"]
 
 [features]
 default = ["std"]

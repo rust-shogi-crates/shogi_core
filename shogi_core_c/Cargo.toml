@@ -7,8 +7,8 @@ rust-version = "1.60"
 description = "C bindings of shogi_core"
 repository = "https://github.com/rust-shogi-crates/shogi_core/tree/main/shogi_core_c"
 license = "MIT"
-keywords = ["shogi"]
-categories = ["game", "no-std"]
+keywords = ["shogi", "engine"]
+categories = ["games", "game-engines", "game-development", "no-std"]
 publish = false
 
 [features]
