@@ -22,7 +22,7 @@ This crate does not support reading of SEFN + moves format because of its comple
 ## Dependencies
 This crate depends only on `core::*` and `alloc::*`. This crate does not depend on `std::*`.
 
-There are environments where depending on `alloc` is impossible. In order to support such environments, items in this crate depends only on `core` as much as possible, and items that must depend on `alloc` are separated by `alloc` feature.
+There are environments where depending on `alloc` is impossible. In order to support such environments, items in this crate depend only on `core` as much as possible, and items that must depend on `alloc` are separated by `alloc` feature.
 
 This crate does not depend on any other crates.
 
