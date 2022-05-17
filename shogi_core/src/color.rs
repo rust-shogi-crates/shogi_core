@@ -45,8 +45,8 @@ impl Color {
 impl ToUsi for Color {
     fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
         sink.write_str(match *self {
-            Color::Black => "B",
-            Color::White => "W",
+            Color::Black => "b",
+            Color::White => "w",
         })
     }
 }
