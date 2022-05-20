@@ -32,6 +32,7 @@ pub trait LegalityChecker {
 
     /// Returns the status of this position.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn status(&self, position: &Position) -> PositionStatus;
     /// Returns the status of this position.
     ///
@@ -46,6 +47,7 @@ pub trait LegalityChecker {
     /// If `position` is not in progress, no moves are considered to be legal.
     /// If `is_legal` returns `Ok(())`, `position.make_move(mv)` must succeed.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn is_legal(&self, position: &Position, mv: Move) -> Result<(), IllegalMoveKind> {
         if self.status(position) != PositionStatus::InProgress {
             return Err(IllegalMoveKind::GameFinished);
@@ -57,6 +59,7 @@ pub trait LegalityChecker {
     /// If `position` is not in progress, no moves are considered to be legal.
     /// If `is_legal_lite` returns `true`, `position.make_move(mv)` must succeed.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn is_legal_lite(&self, position: &Position, mv: Move) -> bool {
         if self.status(position) != PositionStatus::InProgress {
             return false;
@@ -81,6 +84,7 @@ pub trait LegalityChecker {
     ///
     /// If `position` is not in progress, no moves are considered to be legal.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn all_legal_moves(&self, position: &Position) -> alloc::vec::Vec<Move> {
         if self.status(position) != PositionStatus::InProgress {
             return alloc::vec::Vec::new();
@@ -91,6 +95,7 @@ pub trait LegalityChecker {
     ///
     /// If `position` is not in progress, no moves are considered to be legal.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn all_legal_moves_partial(&self, position: &PartialPosition) -> alloc::vec::Vec<Move>;
     /// Finds all legal normal moves in the given position that move a piece from `from` to some square.
     ///
@@ -114,6 +119,7 @@ pub trait LegalityChecker {
     fn drop_candidates(&self, position: &PartialPosition, piece: Piece) -> Bitboard;
     /// Makes a move. Returns `Ok(())` if successful.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn make_move(&self, position: &mut Position, mv: Move) -> Result<(), IllegalMoveKind> {
         self.is_legal(position, mv)?;
         // will always be Some(())

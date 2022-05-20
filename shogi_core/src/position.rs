@@ -9,6 +9,7 @@ use crate::{
 
 /// A record of a game. A position and how a game is resolved.
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[derive(Eq, PartialEq, Clone, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
@@ -91,6 +92,7 @@ impl PartialGame {
 
 /// A position. It provides sufficient data for legality checking.
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[derive(Eq, PartialEq, Clone, Debug, Default)]
 #[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
 #[cfg_attr(feature = "hash", derive(Hash))]
@@ -695,6 +697,7 @@ impl PartialPosition {
     /// );
     ///```
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn to_sfen_owned(&self) -> alloc::string::String {
         let mut s = alloc::string::String::new();
         let _ = self.to_sfen(&mut s); // Cannot fail

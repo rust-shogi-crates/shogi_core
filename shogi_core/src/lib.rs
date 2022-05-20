@@ -1,4 +1,5 @@
 #![cfg_attr(not(test), no_std)] // Forbids using std::*.
+#![cfg_attr(docsrs, feature(doc_cfg))]
 #![doc = include_str!("../README.md")]
 
 #[cfg(feature = "alloc")]

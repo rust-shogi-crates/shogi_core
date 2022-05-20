@@ -12,6 +12,10 @@ license = "MIT"
 keywords = ["shogi", "engine"]
 categories = ["games", "game-engines", "game-development", "no-std"]
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [features]
 default = ["std"]
 alloc = []
