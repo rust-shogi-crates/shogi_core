@@ -8,8 +8,6 @@ use crate::{c_compat::OptionSquare, Square};
 /// Its [`Default`] value is an empty instance.
 #[repr(C)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 // Valid representation: self.0[1] >> 17 must be equal to 0.
 pub struct Bitboard([u64; 2]);
 
@@ -307,6 +305,9 @@ impl Not for &'_ Bitboard {
 pub extern "C" fn Bitboard_not(a: Bitboard) -> Bitboard {
     !a
 }
+
+impl_ord_for_single_field!(Bitboard);
+impl_hash_for_single_field!(Bitboard);
 
 #[cfg(test)]
 mod tests {

@@ -5,6 +5,9 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[macro_use]
+mod annotated_derive;
+
 mod bitboard;
 mod color;
 mod common;

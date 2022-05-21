@@ -8,8 +8,6 @@ use crate::{Bitboard, IllegalMoveKind, Move, PartialPosition, Piece, Square};
 /// for example, it cannot represent resignation and aborting of games.
 #[repr(C)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum PositionStatus {
     /// White's king was mated.
     BlackWins = 1,
@@ -22,6 +20,9 @@ pub enum PositionStatus {
     /// Invalid. A game contains illegal moves or is in an inconsistent state.
     Invalid = 5,
 }
+
+impl_ord_for_fieldless_enum!(PositionStatus);
+impl_hash_for_fieldless_enum!(PositionStatus);
 
 /// A trait that handles legality checking.
 ///

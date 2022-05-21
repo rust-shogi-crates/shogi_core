@@ -6,8 +6,6 @@ use crate::ToUsi;
 /// Because they are cheap to copy, they implement [`Copy`].
 #[repr(u8)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Color {
     /// Black, who plays first. Known as `先手` (*sente*).
     ///
@@ -41,6 +39,9 @@ impl Color {
         [Color::Black, Color::White]
     }
 }
+
+impl_ord_for_fieldless_enum!(Color);
+impl_hash_for_fieldless_enum!(Color);
 
 impl ToUsi for Color {
     fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {

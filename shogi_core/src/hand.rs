@@ -9,8 +9,6 @@ use crate::{PieceKind, ToUsi};
 /// Its [`Default`] value is an empty instance.
 #[repr(C)]
 #[derive(Eq, Clone, Copy, Debug, Default)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Hand([u8; 8]);
 
 impl Hand {
@@ -149,6 +147,9 @@ impl PartialEq for Hand {
         self.as_u64() == other.as_u64()
     }
 }
+
+impl_ord_for_single_field!(Hand);
+impl_hash_for_single_field!(Hand);
 
 /// Finds the USI representation of hand: <https://web.archive.org/web/20080131070731/http://www.glaurungchess.com/shogi/usi.html>
 ///

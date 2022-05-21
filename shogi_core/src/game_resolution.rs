@@ -4,8 +4,6 @@
 /// Because they are cheap to copy, they implement [`Copy`].
 #[repr(u8)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum GameResolution {
     /// White's king was mated or white resigned.
     ///
@@ -41,6 +39,9 @@ impl GameResolution {
     }
 }
 
+impl_ord_for_fieldless_enum!(GameResolution);
+impl_hash_for_fieldless_enum!(GameResolution);
+
 /// <code>[Option]<[GameResolution]></code> with defined representation.
 ///
 /// The representation is:
@@ -54,8 +55,6 @@ impl GameResolution {
 /// See: <https://github.com/eqrion/cbindgen/issues/326>.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct OptionGameResolution(u8);
 
 impl From<Option<GameResolution>> for OptionGameResolution {
@@ -80,6 +79,9 @@ impl From<OptionGameResolution> for Option<GameResolution> {
         }
     }
 }
+
+impl_ord_for_single_field!(OptionGameResolution);
+impl_hash_for_single_field!(OptionGameResolution);
 
 #[cfg(test)]
 mod tests {

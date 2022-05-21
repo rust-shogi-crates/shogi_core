@@ -4,8 +4,6 @@
 /// Because they are cheap to copy, they implement [`Copy`].
 #[repr(u8)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum PieceKind {
     /// A pawn. Unlike in chess, it always moves one square forward,
     /// even if the destination square is occuipied by an enemy piece.
@@ -219,6 +217,9 @@ impl PieceKind {
         ]
     }
 }
+
+impl_ord_for_fieldless_enum!(PieceKind);
+impl_hash_for_fieldless_enum!(PieceKind);
 
 /// <code>[Option]<[PieceKind]></code> with defined representation.
 ///

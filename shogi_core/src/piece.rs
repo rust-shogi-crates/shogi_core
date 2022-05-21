@@ -17,8 +17,6 @@ use crate::{Color, PieceKind, ToUsi};
 /// ```
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 // Internal representation: 1..=14: black, 17..=30: white
 pub struct Piece(NonZeroU8);
 
@@ -30,8 +28,6 @@ pub struct Piece(NonZeroU8);
 /// See: <https://github.com/eqrion/cbindgen/issues/326>
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct OptionPiece(u8);
 
 impl Piece {
@@ -131,6 +127,9 @@ impl Piece {
     }
 }
 
+impl_ord_for_single_field!(Piece);
+impl_hash_for_single_field!(Piece);
+
 impl From<Option<Piece>> for OptionPiece {
     #[inline(always)]
     fn from(arg: Option<Piece>) -> Self {
@@ -147,6 +146,9 @@ impl From<OptionPiece> for Option<Piece> {
         Some(Piece(NonZeroU8::new(arg.0)?))
     }
 }
+
+impl_ord_for_single_field!(OptionPiece);
+impl_hash_for_single_field!(OptionPiece);
 
 impl ToUsi for Piece {
     fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {

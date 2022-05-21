@@ -6,8 +6,6 @@
 /// Note: the equality of sizes are not guaranteed, but assumed to be correct.
 #[repr(u8)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum IllegalMoveKind {
     /// A player has two pawns in the same file. Promoted pawns are not counted.
     ///
@@ -64,6 +62,9 @@ impl IllegalMoveKind {
     }
 }
 
+impl_ord_for_fieldless_enum!(IllegalMoveKind);
+impl_hash_for_fieldless_enum!(IllegalMoveKind);
+
 /// <code>[Result]<[()][unit], [IllegalMoveKind]></code> with defined representation.
 ///
 /// The representation is:
@@ -77,8 +78,6 @@ impl IllegalMoveKind {
 /// See: <https://github.com/eqrion/cbindgen/issues/326>.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct ResultUnitIllegalMoveKind(u8);
 
 impl From<Option<IllegalMoveKind>> for ResultUnitIllegalMoveKind {
@@ -103,6 +102,9 @@ impl From<ResultUnitIllegalMoveKind> for Option<IllegalMoveKind> {
         }
     }
 }
+
+impl_ord_for_single_field!(ResultUnitIllegalMoveKind);
+impl_hash_for_single_field!(ResultUnitIllegalMoveKind);
 
 #[cfg(test)]
 mod tests {

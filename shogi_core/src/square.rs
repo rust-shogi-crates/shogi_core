@@ -8,8 +8,6 @@ use crate::Color;
 /// Because they are cheap to copy, they implement [`Copy`].
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Square(NonZeroU8);
 
 impl Square {
@@ -193,6 +191,9 @@ impl Square {
     }
 }
 
+impl_ord_for_single_field!(Square);
+impl_hash_for_single_field!(Square);
+
 /// C interface of <code>[Option]<[Square]></code>.
 ///
 /// This type is provided for C interoperability.
@@ -202,8 +203,6 @@ impl Square {
 /// See: <https://github.com/eqrion/cbindgen/issues/326>.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct OptionSquare(u8);
 
 impl From<Option<Square>> for OptionSquare {
@@ -222,6 +221,9 @@ impl From<OptionSquare> for Option<Square> {
         Some(Square(NonZeroU8::new(arg.0)?))
     }
 }
+
+impl_ord_for_single_field!(OptionSquare);
+impl_hash_for_single_field!(OptionSquare);
 
 #[cfg(test)]
 mod tests {
