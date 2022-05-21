@@ -103,6 +103,29 @@ impl From<ResultUnitIllegalMoveKind> for Option<IllegalMoveKind> {
     }
 }
 
+impl From<Result<(), IllegalMoveKind>> for ResultUnitIllegalMoveKind {
+    #[inline(always)]
+    fn from(arg: Result<(), IllegalMoveKind>) -> Self {
+        Self(match arg {
+            Err(result) => result as u8,
+            Ok(()) => 0,
+        })
+    }
+}
+
+impl From<ResultUnitIllegalMoveKind> for Result<(), IllegalMoveKind> {
+    #[inline(always)]
+    fn from(arg: ResultUnitIllegalMoveKind) -> Self {
+        if arg.0 == 0 {
+            Ok(())
+        } else {
+            // Safety: arg is a valid OptionIllegalMoveKind, which means 0 <= arg.0 && arg.0 <= 7.
+            // arg.0 == 0 is ruled out.
+            Err(unsafe { IllegalMoveKind::from_u8_unchecked(arg.0) })
+        }
+    }
+}
+
 impl_ord_for_single_field!(ResultUnitIllegalMoveKind);
 impl_hash_for_single_field!(ResultUnitIllegalMoveKind);
 
@@ -126,6 +149,18 @@ mod tests {
         for repr in 1..=7 {
             let value = IllegalMoveKind::from_u8(repr).unwrap();
             assert_eq!(value as u8, repr);
+        }
+    }
+
+    #[test]
+    fn from_works() {
+        for repr in 1..=7 {
+            let value = IllegalMoveKind::from_u8(repr).unwrap();
+            assert_eq!(
+                Result::from(ResultUnitIllegalMoveKind::from(Err(value))),
+                Err(value),
+            );
+            assert_eq!(ResultUnitIllegalMoveKind::from(Err(value)).0, repr);
         }
     }
 }
