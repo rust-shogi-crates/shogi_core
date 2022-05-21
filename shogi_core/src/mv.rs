@@ -6,8 +6,6 @@ use crate::{c_compat::OptionSquare, Piece, Square};
 ///
 /// Because [`Move`] is cheap to copy, it implements [`Copy`].
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub enum Move {
     /// A normal move, where a piece on a square is moved to another square.
     /// You can choose to promote a piece if certain conditions are met.
@@ -72,6 +70,66 @@ impl Move {
     }
 }
 
+#[cfg(feature = "ord")]
+#[cfg_attr(docsrs, doc(cfg(feature = "ord")))]
+impl core::cmp::PartialOrd for Move {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+#[cfg(feature = "ord")]
+#[cfg_attr(docsrs, doc(cfg(feature = "ord")))]
+impl core::cmp::Ord for Move {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        match (*self, *other) {
+            (Move::Normal { .. }, Move::Drop { .. }) => core::cmp::Ordering::Less,
+            (Move::Drop { .. }, Move::Normal { .. }) => core::cmp::Ordering::Greater,
+            (
+                Move::Normal {
+                    from: from1,
+                    to: to1,
+                    promote: promote1,
+                },
+                Move::Normal {
+                    from: from2,
+                    to: to2,
+                    promote: promote2,
+                },
+            ) => (from1, to1, promote1).cmp(&(from2, to2, promote2)),
+            (
+                Move::Drop {
+                    piece: piece1,
+                    to: to1,
+                },
+                Move::Drop {
+                    piece: piece2,
+                    to: to2,
+                },
+            ) => (piece1, to1).cmp(&(piece2, to2)),
+        }
+    }
+}
+
+#[cfg(feature = "hash")]
+#[cfg_attr(docsrs, doc(cfg(feature = "hash")))]
+impl core::hash::Hash for Move {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        core::mem::discriminant(self).hash(state);
+        match *self {
+            Move::Normal { from, to, promote } => {
+                from.hash(state);
+                to.hash(state);
+                promote.hash(state);
+            }
+            Move::Drop { piece, to } => {
+                piece.hash(state);
+                to.hash(state);
+            }
+        }
+    }
+}
+
 /// A move packed in two bytes. C-compatible version of [`Move`].
 ///
 /// Representation is as follows:
@@ -81,8 +139,6 @@ impl Move {
 /// Note that the representation cannot be zero.
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct CompactMove(NonZeroU16);
 
 impl From<Move> for CompactMove {
@@ -192,14 +248,15 @@ impl CompactMove {
     }
 }
 
+impl_ord_for_single_field!(CompactMove);
+impl_hash_for_single_field!(CompactMove);
+
 /// C-compatible type for <code>[Option]<[CompactMove]></code>.
 ///
 /// cbindgen cannot deduce that <code>[Option]<[CompactMove]></code> can be represented by `uint16_t` in C, so we need to define the bridge type.
 /// See: <https://github.com/eqrion/cbindgen/issues/326>.
 #[repr(transparent)]
-#[derive(Eq, PartialEq, Clone, Copy, Debug)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
+#[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
 pub struct OptionCompactMove(u16);
 
 impl From<Option<CompactMove>> for OptionCompactMove {
@@ -218,6 +275,9 @@ impl From<OptionCompactMove> for Option<CompactMove> {
         Some(CompactMove(NonZeroU16::new(arg.0)?))
     }
 }
+
+impl_ord_for_single_field!(OptionCompactMove);
+impl_hash_for_single_field!(OptionCompactMove);
 
 #[cfg(test)]
 mod tests {

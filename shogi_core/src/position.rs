@@ -9,9 +9,8 @@ use crate::{
 
 /// A record of a game. A position and how a game is resolved.
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[derive(Eq, PartialEq, Clone, Debug, Default)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Game {
     inner: Position,
     resolution: OptionGameResolution,
@@ -49,10 +48,13 @@ impl Game {
     }
 }
 
+#[cfg(feature = "alloc")]
+impl_ord_with_fields!(Game; inner, resolution);
+#[cfg(feature = "alloc")]
+impl_hash_with_fields!(Game; inner, resolution);
+
 /// A record of a game. A position and how a game is resolved.
 #[derive(Eq, PartialEq, Clone, Debug, Default)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PartialGame {
     inner: PartialPosition,
     resolution: OptionGameResolution,
@@ -89,11 +91,13 @@ impl PartialGame {
     }
 }
 
+impl_ord_with_fields!(PartialGame; inner, resolution);
+impl_hash_with_fields!(PartialGame; inner, resolution);
+
 /// A position. It provides sufficient data for legality checking.
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[derive(Eq, PartialEq, Clone, Debug, Default)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct Position {
     initial: PartialPosition,
     inner: PartialPosition,
@@ -327,6 +331,11 @@ impl Position {
     }
 }
 
+#[cfg(feature = "alloc")]
+impl_ord_with_fields!(Position; initial, inner, moves);
+#[cfg(feature = "alloc")]
+impl_hash_with_fields!(Position; initial, inner, moves);
+
 /// A position with its move sequence omitted.
 ///
 /// This data is insufficient for complete legality checking (such as repetition checking),
@@ -335,8 +344,6 @@ impl Position {
 /// TODO: describe exactly when a position is considered valid
 #[derive(Eq, PartialEq, Clone, Debug)]
 #[repr(C)]
-#[cfg_attr(feature = "ord", derive(PartialOrd, Ord))]
-#[cfg_attr(feature = "hash", derive(Hash))]
 pub struct PartialPosition {
     side: Color,
     ply: u16,
@@ -695,6 +702,7 @@ impl PartialPosition {
     /// );
     ///```
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn to_sfen_owned(&self) -> alloc::string::String {
         let mut s = alloc::string::String::new();
         let _ = self.to_sfen(&mut s); // Cannot fail
@@ -731,6 +739,9 @@ impl PartialPosition {
         let _ = write_ascii_byte(&mut sink, b'\0');
     }
 }
+
+impl_ord_with_fields!(PartialPosition; side, ply, hands, board, last_move);
+impl_hash_with_fields!(PartialPosition; side, ply, hands, board, last_move);
 
 impl Default for PartialPosition {
     fn default() -> Self {

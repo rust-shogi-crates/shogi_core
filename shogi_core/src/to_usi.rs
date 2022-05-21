@@ -10,6 +10,7 @@ pub trait ToUsi {
 
     /// Returns `self`'s string representation.
     #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     fn to_usi_owned(&self) -> alloc::string::String {
         let mut s = alloc::string::String::new();
         // guaranteed to be Ok(())
