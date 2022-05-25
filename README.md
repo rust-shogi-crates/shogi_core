@@ -7,9 +7,3 @@
 This repository defines fundamental data types and functions for shogi (Japanese chess). It consists of two crates: a library crate that defines items (`rlib` crate), and a library crate that defines C bindings to them (`cdylib` crate).
 
 Crates in this repository do not require the standard library (i.e., can be used by `no_std` crates) and suitable for embedded systems, as well as ordinary applications, of course.
-
-## Available features
-- `alloc`: `alloc`-related functionalities are made available. Enabled by default.
-- `std`: `std`-related functionalities are made available. Implies `alloc`. Enabled by default.
-- `hash`: implements [`Hash`](https://doc.rust-lang.org/core/hash/trait.Hash.html) for every type it exports.
-- `ord`: implements [`PartialOrd`](https://doc.rust-lang.org/core/cmp/trait.PartialOrd.html) and [`Ord`](https://doc.rust-lang.org/core/cmp/trait.Ord.html) for every type it exports.
