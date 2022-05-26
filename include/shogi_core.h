@@ -11,6 +11,25 @@
 
 
 /**
+ * How many elements should an array indexed by [`Color`] have?
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::Color;
+ * // values is long enough so values[color.index()] never panics
+ * let mut values = [0; Color::NUM];
+ * values[Color::Black.array_index()] = 10;
+ * values[Color::White.array_index()] = -10;
+ * ```
+ * Since: 0.1.2
+ */
+#define Color_NUM 2
+
+#if defined(DEFINE_EXPERIMENTAL)
+#define PieceKind_OPTION_NUM 15
+#endif
+
+/**
  * A player.
  *
  * [`Color`] and <code>[Option]<[Color]></code> are both 1-byte data types.
@@ -300,6 +319,19 @@ typedef struct Bitboard {
  * Because they are cheap to copy, they implement [`Copy`].
  */
 typedef uint8_t Square;
+/**
+ * How many elements should an array indexed by [`Square`] have?
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{PieceKind, Square};
+ * // values is long enough so values[square.index()] never panics
+ * let mut values = [None; Square::NUM];
+ * values[Square::new(5, 9).unwrap().array_index()] = Some(PieceKind::King);
+ * ```
+ * Since: 0.1.2
+ */
+#define Square_NUM 81
 
 /**
  * C interface of <code>[Option]<[Square]></code>.
@@ -338,6 +370,23 @@ typedef uint16_t CompactMove;
  * ```
  */
 typedef uint8_t Piece;
+#if defined(DEFINE_EXPERIMENTAL)
+/**
+ * How many elements should an array indexed by [`Piece`] have?
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Color, Piece, PieceKind};
+ * // values is long enough so values[piece_kind.index()] never panics
+ * let mut values = [0; Piece::NUM];
+ * values[Piece::new(PieceKind::Pawn, Color::White).array_index()] = -10;
+ * values[Piece::new(PieceKind::Lance, Color::Black).array_index()] = 25;
+ * values[Piece::new(PieceKind::ProRook, Color::White).array_index()] = -155;
+ * ```
+ * This item is experimental: it is subject to change or deletion.
+ */
+#define Piece_NUM 31
+#endif
 
 /**
  * <code>[Option]<[GameResolution]></code> with defined representation.

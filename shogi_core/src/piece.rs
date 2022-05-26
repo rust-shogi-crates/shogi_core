@@ -110,6 +110,34 @@ impl Piece {
         Self(NonZeroU8::new_unchecked(value))
     }
 
+    /// Returns the index of `self` for array accesses. This function returns an integer in range `0..Piece::MAX`.
+    ///
+    /// This item is experimental: it is subject to change or deletion.
+    #[cfg_attr(docsrs, doc(cfg(feature = "experimental")))]
+    #[cfg(feature = "experimental")]
+    #[inline]
+    pub const fn array_index(self) -> usize {
+        self.0.get() as usize - 1
+    }
+
+    /// How many elements should an array indexed by [`Piece`] have?
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Color, Piece, PieceKind};
+    /// // values is long enough so values[piece_kind.index()] never panics
+    /// let mut values = [0; Piece::NUM];
+    /// values[Piece::new(PieceKind::Pawn, Color::White).array_index()] = -10;
+    /// values[Piece::new(PieceKind::Lance, Color::Black).array_index()] = 25;
+    /// values[Piece::new(PieceKind::ProRook, Color::White).array_index()] = -155;
+    /// ```
+    /// This item is experimental: it is subject to change or deletion.
+    #[cfg_attr(docsrs, doc(cfg(feature = "experimental")))]
+    #[cfg(feature = "experimental")]
+    // Apery-style: non-contiguous, memory-consuming but fast
+    // https://github.com/HiraokaTakuya/apery_rust/blob/v2.0.0/src/piecevalue.rs#L18-L50
+    pub const NUM: usize = 31;
+
     /// Returns all possible [`Piece`]s.
     pub fn all() -> [Self; 28] {
         let mut result = [Self::new(PieceKind::Pawn, Color::Black); 28];

@@ -34,6 +34,27 @@ impl Color {
         unsafe { core::mem::transmute(self as u8 ^ 3) }
     }
 
+    /// Returns the index of `self` for array accesses. This function returns an integer in range `0..Color::MAX`.
+    ///
+    /// Since: 0.1.2
+    #[inline]
+    pub const fn array_index(self) -> usize {
+        self as usize - 1
+    }
+
+    /// How many elements should an array indexed by [`Color`] have?
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::Color;
+    /// // values is long enough so values[color.index()] never panics
+    /// let mut values = [0; Color::NUM];
+    /// values[Color::Black.array_index()] = 10;
+    /// values[Color::White.array_index()] = -10;
+    /// ```
+    /// Since: 0.1.2
+    pub const NUM: usize = 2;
+
     /// Returns all possible `Color`s in the ascending order of their discriminants.
     pub fn all() -> [Self; 2] {
         [Color::Black, Color::White]
@@ -61,5 +82,12 @@ mod tests {
         let colors = Color::all();
         assert_eq!(colors[0].flip(), colors[1]);
         assert_eq!(colors[1].flip(), colors[0]);
+    }
+
+    #[test]
+    fn array_index_works() {
+        for i in 0..2 {
+            assert_eq!(Color::all()[i].array_index(), i);
+        }
     }
 }
