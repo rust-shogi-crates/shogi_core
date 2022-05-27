@@ -34,7 +34,7 @@ impl Move {
     /// ```
     /// # use shogi_core::{Color, Move, Piece, PieceKind, Square};
     /// assert_eq!(Move::Normal { from: Square::SQ_1B, to: Square::SQ_3D, promote: false}.from(), Some(Square::SQ_1B));
-    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::SQ_3D }.from(), None);
+    /// assert_eq!(Move::Drop { piece: Piece::B_P, to: Square::SQ_3D }.from(), None);
     /// ```
     pub fn from(self) -> Option<Square> {
         match self {
@@ -49,7 +49,7 @@ impl Move {
     /// ```
     /// # use shogi_core::{Color, Move, Piece, PieceKind, Square};
     /// assert_eq!(Move::Normal { from: Square::SQ_1B, to: Square::SQ_3D, promote: false}.to(), Square::SQ_3D);
-    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::SQ_4E }.to(), Square::SQ_4E);
+    /// assert_eq!(Move::Drop { piece: Piece::B_P, to: Square::SQ_4E }.to(), Square::SQ_4E);
     /// ```
     pub fn to(self) -> Square {
         match self {
@@ -196,7 +196,7 @@ impl CompactMove {
     /// Examples:
     /// ```
     /// # use shogi_core::{Color, CompactMove, Move, Piece, PieceKind, Square};
-    /// let piece = Piece::new(PieceKind::Gold, Color::White);
+    /// let piece = Piece::W_G;
     /// let to = Square::SQ_3D;
     /// assert_eq!(<CompactMove as From<Move>>::from(Move::Drop { piece, to }), CompactMove::drop(piece, to));
     /// ```

@@ -31,8 +31,6 @@ pub use crate::color::Color;
 #[doc(inline)]
 pub use crate::square::Square;
 
-pub use crate::square::consts;
-
 #[doc(inline)]
 pub use crate::piece_kind::PieceKind;
 
@@ -86,6 +84,12 @@ pub mod c_compat {
 
     #[doc(inline)]
     pub use crate::illegal_move_kind::ResultUnitIllegalMoveKind;
+}
+
+/// Constant values.
+pub mod consts {
+    include!(concat!(env!("OUT_DIR"), "/piece_consts.rs"));
+    include!(concat!(env!("OUT_DIR"), "/square_consts.rs"));
 }
 
 #[cfg(test)]
