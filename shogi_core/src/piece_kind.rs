@@ -197,8 +197,45 @@ impl PieceKind {
         self.unpromote().into()
     }
 
+    /// Returns the index of `self` for array accesses. This function returns an integer in range `0..PieceKind::MAX`.
+    ///
+    /// Since: 0.1.2
+    #[inline]
+    pub const fn array_index(self) -> usize {
+        self as usize - 1
+    }
+
+    /// How many elements should an array indexed by [`PieceKind`] have?
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::PieceKind;
+    /// // values is long enough so values[piece_kind.index()] never panics
+    /// let mut values = [0; PieceKind::NUM];
+    /// values[PieceKind::Pawn.array_index()] = 10;
+    /// values[PieceKind::Lance.array_index()] = 25;
+    /// values[PieceKind::ProRook.array_index()] = 155;
+    /// ```
+    /// Since: 0.1.2
+    // cbindgen:0.23.0 emits an error for this.
+    pub const NUM: usize = 14;
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "experimental")))]
+    #[cfg(feature = "experimental")]
+    #[inline]
+    pub const fn option_array_index(arg: Option<Self>) -> usize {
+        match arg {
+            Some(result) => result as usize,
+            None => 0,
+        }
+    }
+
+    #[cfg_attr(docsrs, doc(cfg(feature = "experimental")))]
+    #[cfg(feature = "experimental")]
+    pub const OPTION_NUM: usize = 15;
+
     /// Returns all possible `PieceKind`s in the ascending order of their discriminants.
-    pub fn all() -> [Self; 14] {
+    pub fn all() -> [Self; Self::NUM] {
         [
             PieceKind::Pawn,
             PieceKind::Lance,
@@ -266,6 +303,14 @@ mod tests {
     fn from_u8_works() {
         for piece_kind in PieceKind::all() {
             assert_eq!(PieceKind::from_u8(piece_kind as u8), Some(piece_kind));
+        }
+    }
+
+    #[test]
+    fn array_index_works() {
+        assert_eq!(PieceKind::all().len(), PieceKind::NUM);
+        for i in 0..PieceKind::NUM {
+            assert_eq!(PieceKind::all()[i].array_index(), i);
         }
     }
 }

@@ -15,3 +15,4 @@ For x86_64-unknown-linux-gnu, the resulting shared object's size does not exceed
 ## Available features
 - `alloc`: `alloc`-related functionalities are made available. Enabled by default.
 - `std`: `std`-related functionalities are made available. Implies `alloc`. Enabled by default.
+- `experimental`: enables experimental functionalities. Items marked as `experimental` are considered exempt from semantic versioning, and subject to change or deletion without notice.

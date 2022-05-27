@@ -35,6 +35,7 @@ usize_is_size_t = true
 [defines]
 "feature = alloc" = "DEFINE_ALLOC"
 "feature = std" = "DEFINE_STD"
+"feature = experimental" = "DEFINE_EXPERIMENTAL"
 
 [export]
 include = []

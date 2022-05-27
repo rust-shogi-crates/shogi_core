@@ -98,3 +98,4 @@ SFEN + moves 形式の読み取りは提供しません。複雑であるため�
 - `std`: `std` 関連の機能が利用可能になります。有効化すると `alloc` も有効化されます。デフォルトで有効化されています。
 - `hash`: エクスポートするすべての型に [`Hash`](https://doc.rust-lang.org/core/hash/trait.Hash.html) を実装します。
 - `ord`: エクスポートするすべての型に [`PartialOrd`](https://doc.rust-lang.org/core/cmp/trait.PartialOrd.html) と [`Ord`](https://doc.rust-lang.org/core/cmp/trait.Ord.html) を実装します。
+- `experimental`: 実験的な機能を有効化します。`experimental` とマークされたアイテムは semantic versioning の対象外であるとみなされており、予告せずに削除・変更することがあります。

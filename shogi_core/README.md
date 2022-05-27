@@ -98,3 +98,4 @@ Not implemented.
 - `std`: `std`-related functionalities are made available. Implies `alloc`. Enabled by default.
 - `hash`: implements [`Hash`](https://doc.rust-lang.org/core/hash/trait.Hash.html) for every type it exports.
 - `ord`: implements [`PartialOrd`](https://doc.rust-lang.org/core/cmp/trait.PartialOrd.html) and [`Ord`](https://doc.rust-lang.org/core/cmp/trait.Ord.html) for every type it exports.
+- `experimental`: enables experimental functionalities. Items marked as `experimental` are considered exempt from semantic versioning, and subject to change or deletion without notice.

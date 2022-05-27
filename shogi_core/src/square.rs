@@ -178,6 +178,26 @@ impl Square {
         Some(unsafe { Self::from_u8_unchecked((file_m1 * 9 + rank_m1 + 1) as u8) })
     }
 
+    /// Returns the index of `self` for array accesses. This function returns an integer in range `0..Square::MAX`.
+    ///
+    /// Since: 0.1.2
+    #[inline]
+    pub const fn array_index(self) -> usize {
+        (self.0.get() - 1) as usize
+    }
+
+    /// How many elements should an array indexed by [`Square`] have?
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{PieceKind, Square};
+    /// // values is long enough so values[square.index()] never panics
+    /// let mut values = [None; Square::NUM];
+    /// values[Square::new(5, 9).unwrap().array_index()] = Some(PieceKind::King);
+    /// ```
+    /// Since: 0.1.2
+    pub const NUM: usize = 81;
+
     /// Returns an iterator that iterates over all possible [`Square`]s
     /// in the ascending order of their indices.
     ///
@@ -315,6 +335,12 @@ mod tests {
                     }
                 }
             }
+        }
+    }
+    #[test]
+    fn array_index_works() {
+        for (index, sq) in Square::all().enumerate() {
+            assert_eq!(sq.array_index(), index);
         }
     }
 }
