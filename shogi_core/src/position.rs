@@ -198,7 +198,7 @@ impl Position {
     /// # use shogi_core::{Color, Piece, PieceKind, Position, Square};
     /// let pos = Position::startpos();
     /// let black_rook = pos.piece_at(Square::SQ_2H);
-    /// assert_eq!(black_rook, Some(Piece::new(PieceKind::Rook, Color::Black)));
+    /// assert_eq!(black_rook, Some(Piece::B_R));
     /// let vacant = pos.piece_at(Square::SQ_3H);
     /// assert_eq!(vacant, None);
     /// ```
@@ -238,9 +238,9 @@ impl Position {
     /// ```
     /// # use shogi_core::{Bitboard, Color, Piece, PieceKind, Position, Square};
     /// let pos = Position::startpos();
-    /// let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+    /// let black_rook = pos.piece_bitboard(Piece::B_R);
     /// assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
-    /// let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+    /// let white_rook = pos.piece_bitboard(Piece::W_R);
     /// assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
     /// ```
     #[export_name = "Position_piece_bitboard"]
@@ -370,14 +370,14 @@ impl PartialPosition {
         let mut board = [None.into(); 81];
         // Pawns
         for i in 0..9 {
-            board[6 + i * 9] = Some(Piece::new(PieceKind::Pawn, Color::Black)).into();
-            board[2 + i * 9] = Some(Piece::new(PieceKind::Pawn, Color::White)).into();
+            board[6 + i * 9] = Some(Piece::B_P).into();
+            board[2 + i * 9] = Some(Piece::W_P).into();
         }
         // Bishop, Rook
-        board[70] = Some(Piece::new(PieceKind::Bishop, Color::Black)).into();
-        board[10] = Some(Piece::new(PieceKind::Bishop, Color::White)).into();
-        board[16] = Some(Piece::new(PieceKind::Rook, Color::Black)).into();
-        board[64] = Some(Piece::new(PieceKind::Rook, Color::White)).into();
+        board[70] = Some(Piece::B_B).into();
+        board[10] = Some(Piece::W_B).into();
+        board[16] = Some(Piece::B_R).into();
+        board[64] = Some(Piece::W_R).into();
         // Other minor pieces
         let order = [
             PieceKind::Lance,
@@ -478,7 +478,7 @@ impl PartialPosition {
     /// # use shogi_core::{Color, PartialPosition, Piece, PieceKind, Square};
     /// let pos = PartialPosition::startpos();
     /// let black_rook = pos.piece_at(Square::SQ_2H);
-    /// assert_eq!(black_rook, Some(Piece::new(PieceKind::Rook, Color::Black)));
+    /// assert_eq!(black_rook, Some(Piece::B_R));
     /// let vacant = pos.piece_at(Square::SQ_3H);
     /// assert_eq!(vacant, None);
     /// ```
@@ -540,9 +540,9 @@ impl PartialPosition {
     /// ```
     /// # use shogi_core::{Bitboard, Color, PartialPosition, Piece, PieceKind, Square};
     /// let pos = PartialPosition::startpos();
-    /// let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+    /// let black_rook = pos.piece_bitboard(Piece::B_R);
     /// assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
-    /// let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+    /// let white_rook = pos.piece_bitboard(Piece::W_R);
     /// assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
     /// ```
     #[export_name = "PartialPosition_piece_bitboard"]
@@ -786,8 +786,8 @@ mod tests {
             promote: false,
         })
         .unwrap(); // 3a2b
-        assert_eq!(s.hand(Piece::new(PieceKind::Bishop, Color::Black)), Some(1));
-        assert_eq!(s.hand(Piece::new(PieceKind::Bishop, Color::White)), Some(1));
+        assert_eq!(s.hand(Piece::B_B), Some(1));
+        assert_eq!(s.hand(Piece::W_B), Some(1));
         assert_eq!(
             s.to_sfen_owned(),
             "lnsgkg1nl/1r5s1/pppppp1pp/6p2/9/2P6/PP1PPPPPP/7R1/LNSGKGSNL b Bb 5",

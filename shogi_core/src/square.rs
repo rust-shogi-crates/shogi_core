@@ -230,8 +230,6 @@ impl Square {
     }
 }
 
-include!(concat!(env!("OUT_DIR"), "/square_consts.rs"));
-
 impl_ord_for_single_field!(Square);
 impl_hash_for_single_field!(Square);
 

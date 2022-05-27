@@ -13,7 +13,7 @@ use crate::{Color, PieceKind, ToUsi};
 /// ```
 /// use shogi_core::{Color, Piece, PieceKind};
 /// assert_eq!(core::mem::size_of::<Piece>(), 1);
-/// assert!(Piece::new(PieceKind::Pawn, Color::Black).as_u8() <= 14);
+/// assert!(Piece::B_P.as_u8() <= 14);
 /// ```
 #[repr(transparent)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug)]
@@ -33,8 +33,7 @@ pub struct OptionPiece(u8);
 impl Piece {
     /// Creates a new [`Piece`] from a [`PieceKind`] and a [`Color`].
     #[must_use]
-    #[export_name = "Piece_new"]
-    pub extern "C" fn new(piece_kind: PieceKind, color: Color) -> Self {
+    pub const fn new(piece_kind: PieceKind, color: Color) -> Self {
         let disc = piece_kind as u8;
         let value = disc
             + match color {
@@ -43,6 +42,11 @@ impl Piece {
             };
         // Safety: disc > 0 always holds
         Piece(unsafe { NonZeroU8::new_unchecked(value) })
+    }
+    /// C interface to [`Piece::new`].
+    #[no_mangle]
+    pub extern "C" fn Piece_new(piece_kind: PieceKind, color: Color) -> Self {
+        Self::new(piece_kind, color)
     }
     /// An inverse of [`Piece::new`]. Finds a [`PieceKind`] and a [`Color`] from a [`Piece`].
     #[must_use]
@@ -127,9 +131,9 @@ impl Piece {
     /// # use shogi_core::{Color, Piece, PieceKind};
     /// // values is long enough so values[piece_kind.index()] never panics
     /// let mut values = [0; Piece::NUM];
-    /// values[Piece::new(PieceKind::Pawn, Color::White).array_index()] = -10;
-    /// values[Piece::new(PieceKind::Lance, Color::Black).array_index()] = 25;
-    /// values[Piece::new(PieceKind::ProRook, Color::White).array_index()] = -155;
+    /// values[Piece::W_P.array_index()] = -10;
+    /// values[Piece::B_L.array_index()] = 25;
+    /// values[Piece::W_PR.array_index()] = -155;
     /// ```
     /// This item is experimental: it is subject to change or deletion.
     #[cfg_attr(docsrs, doc(cfg(feature = "experimental")))]

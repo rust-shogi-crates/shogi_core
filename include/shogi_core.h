@@ -366,7 +366,7 @@ typedef uint16_t CompactMove;
  * ```
  * use shogi_core::{Color, Piece, PieceKind};
  * assert_eq!(core::mem::size_of::<Piece>(), 1);
- * assert!(Piece::new(PieceKind::Pawn, Color::Black).as_u8() <= 14);
+ * assert!(Piece::B_P.as_u8() <= 14);
  * ```
  */
 typedef uint8_t Piece;
@@ -379,9 +379,9 @@ typedef uint8_t Piece;
  * # use shogi_core::{Color, Piece, PieceKind};
  * // values is long enough so values[piece_kind.index()] never panics
  * let mut values = [0; Piece::NUM];
- * values[Piece::new(PieceKind::Pawn, Color::White).array_index()] = -10;
- * values[Piece::new(PieceKind::Lance, Color::Black).array_index()] = 25;
- * values[Piece::new(PieceKind::ProRook, Color::White).array_index()] = -155;
+ * values[Piece::W_P.array_index()] = -10;
+ * values[Piece::B_L.array_index()] = 25;
+ * values[Piece::W_PR.array_index()] = -155;
  * ```
  * This item is experimental: it is subject to change or deletion.
  */
@@ -583,7 +583,7 @@ Color Color_flip(Color self);
  * Examples:
  * ```
  * # use shogi_core::{Color, CompactMove, Move, Piece, PieceKind, Square};
- * let piece = Piece::new(PieceKind::Gold, Color::White);
+ * let piece = Piece::W_G;
  * let to = Square::SQ_3D;
  * assert_eq!(<CompactMove as From<Move>>::from(Move::Drop { piece, to }), CompactMove::drop(piece, to));
  * ```
@@ -750,9 +750,9 @@ OptionPiece PartialPosition_piece_at(const struct PartialPosition *self, Square 
  * ```
  * # use shogi_core::{Bitboard, Color, PartialPosition, Piece, PieceKind, Square};
  * let pos = PartialPosition::startpos();
- * let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+ * let black_rook = pos.piece_bitboard(Piece::B_R);
  * assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
- * let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+ * let white_rook = pos.piece_bitboard(Piece::W_R);
  * assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
  * ```
  */
@@ -831,7 +831,7 @@ OptionPieceKind PieceKind_unpromote(PieceKind self);
 Color Piece_color(Piece self);
 
 /**
- * Creates a new [`Piece`] from a [`PieceKind`] and a [`Color`].
+ * C interface to [`Piece::new`].
  */
 Piece Piece_new(PieceKind piece_kind, Color color);
 
@@ -901,9 +901,9 @@ OptionPiece Position_piece_at(const struct Position *self, Square square);
  * ```
  * # use shogi_core::{Bitboard, Color, Piece, PieceKind, Position, Square};
  * let pos = Position::startpos();
- * let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
+ * let black_rook = pos.piece_bitboard(Piece::B_R);
  * assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
- * let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
+ * let white_rook = pos.piece_bitboard(Piece::W_R);
  * assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
  * ```
  */
