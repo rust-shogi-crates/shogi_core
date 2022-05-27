@@ -989,7 +989,7 @@ Square Square_flip(Square self);
 struct Option_Square Square_from_u8(uint8_t value);
 
 /**
- * Converts [`u8`] to [`Square`] without checking.
+ * C interface to [`Square::from_u8_unchecked`].
  *
  * # Safety
  * `value` must be in range 1..=81
@@ -1009,27 +1009,14 @@ Square Square_from_u8_unchecked(uint8_t value);
 uint8_t Square_index(Square self);
 
 /**
- * Creates a new [`Square`] with given `file` and `rank`.
- *
- * `file` and `rank` must be between 1 and 9 (both inclusive).
- * If this condition is not met, this function returns None.
+ * C interface to [`Square::new`].
  */
-struct Option_Square Square_new(uint8_t file, uint8_t rank);
+OptionSquare Square_new(uint8_t file, uint8_t rank);
 
 /**
- * Creates a new [`Square`] with given `file`, `rank` and `color`.
- *
- * `file` and `rank` must be between 1 and 9 (both inclusive).
- * If this condition is not met, this function returns None.
- *
- * Examples:
- * ```
- * use shogi_core::{Color, Square};
- * assert_eq!(Square::new_relative(3, 4, Color::Black), Square::new(3, 4));
- * assert_eq!(Square::new_relative(3, 4, Color::White), Square::new(7, 6));
- * ```
+ * C interface to [`Square::new_relative`].
  */
-struct Option_Square Square_new_relative(uint8_t file, uint8_t rank, Color color);
+OptionSquare Square_new_relative(uint8_t file, uint8_t rank, Color color);
 
 /**
  * Finds the rank in range `1..=9`.

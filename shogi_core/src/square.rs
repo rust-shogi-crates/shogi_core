@@ -15,8 +15,7 @@ impl Square {
     ///
     /// `file` and `rank` must be between 1 and 9 (both inclusive).
     /// If this condition is not met, this function returns None.
-    #[export_name = "Square_new"]
-    pub extern "C" fn new(file: u8, rank: u8) -> Option<Self> {
+    pub const fn new(file: u8, rank: u8) -> Option<Self> {
         if file.wrapping_sub(1) >= 9 || rank.wrapping_sub(1) >= 9 {
             return None;
         }
@@ -24,6 +23,12 @@ impl Square {
         Some(Square(unsafe {
             NonZeroU8::new_unchecked(file * 9 + rank - 9)
         }))
+    }
+
+    /// C interface to [`Square::new`].
+    #[no_mangle]
+    pub extern "C" fn Square_new(file: u8, rank: u8) -> OptionSquare {
+        Square::new(file, rank).into()
     }
 
     /// Creates a new [`Square`] with given `file`, `rank` and `color`.
@@ -37,8 +42,7 @@ impl Square {
     /// assert_eq!(Square::new_relative(3, 4, Color::Black), Square::new(3, 4));
     /// assert_eq!(Square::new_relative(3, 4, Color::White), Square::new(7, 6));
     /// ```
-    #[export_name = "Square_new_relative"]
-    pub extern "C" fn new_relative(file: u8, rank: u8, color: Color) -> Option<Self> {
+    pub const fn new_relative(file: u8, rank: u8, color: Color) -> Option<Self> {
         if file.wrapping_sub(1) >= 9 || rank.wrapping_sub(1) >= 9 {
             return None;
         }
@@ -50,6 +54,12 @@ impl Square {
                 Color::White => 82 - relative_index,
             })
         }))
+    }
+
+    /// C interface to [`Square::new_relative`].
+    #[no_mangle]
+    pub extern "C" fn Square_new_relative(file: u8, rank: u8, color: Color) -> OptionSquare {
+        Square::new_relative(file, rank, color).into()
     }
 
     /// Finds the file in range `1..=9`.
@@ -153,8 +163,17 @@ impl Square {
     /// # Safety
     /// `value` must be in range 1..=81
     #[inline(always)]
-    #[export_name = "Square_from_u8_unchecked"]
-    pub unsafe extern "C" fn from_u8_unchecked(value: u8) -> Self {
+    pub const unsafe fn from_u8_unchecked(value: u8) -> Self {
+        Self(NonZeroU8::new_unchecked(value))
+    }
+
+    /// C interface to [`Square::from_u8_unchecked`].
+    ///
+    /// # Safety
+    /// `value` must be in range 1..=81
+    #[inline(always)]
+    #[no_mangle]
+    pub unsafe extern "C" fn Square_from_u8_unchecked(value: u8) -> Self {
         Self(NonZeroU8::new_unchecked(value))
     }
 
@@ -210,6 +229,8 @@ impl Square {
         (1..=81).map(|index| unsafe { Self::from_u8_unchecked(index) })
     }
 }
+
+include!(concat!(env!("OUT_DIR"), "/square_consts.rs"));
 
 impl_ord_for_single_field!(Square);
 impl_hash_for_single_field!(Square);
