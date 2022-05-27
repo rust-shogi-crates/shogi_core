@@ -156,7 +156,7 @@ impl Position {
     /// # use shogi_core::{Color, Move, Position, Square};
     /// let mut pos = Position::startpos();
     /// assert_eq!(pos.side_to_move(), Color::Black);
-    /// pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+    /// pos.make_move(Move::Normal { from: Square::SQ_7G, to: Square::SQ_7F, promote: false }).unwrap();
     /// assert_eq!(pos.side_to_move(), Color::White);
     /// ```
     #[export_name = "Position_side_to_move"]
@@ -197,9 +197,9 @@ impl Position {
     /// ```
     /// # use shogi_core::{Color, Piece, PieceKind, Position, Square};
     /// let pos = Position::startpos();
-    /// let black_rook = pos.piece_at(Square::new(2, 8).unwrap());
+    /// let black_rook = pos.piece_at(Square::SQ_2H);
     /// assert_eq!(black_rook, Some(Piece::new(PieceKind::Rook, Color::Black)));
-    /// let vacant = pos.piece_at(Square::new(3, 8).unwrap());
+    /// let vacant = pos.piece_at(Square::SQ_3H);
     /// assert_eq!(vacant, None);
     /// ```
     pub fn piece_at(&self, square: Square) -> Option<Piece> {
@@ -239,9 +239,9 @@ impl Position {
     /// # use shogi_core::{Bitboard, Color, Piece, PieceKind, Position, Square};
     /// let pos = Position::startpos();
     /// let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
-    /// assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+    /// assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
     /// let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
-    /// assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+    /// assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
     /// ```
     #[export_name = "Position_piece_bitboard"]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
@@ -416,7 +416,7 @@ impl PartialPosition {
     /// # use shogi_core::{Color, Move, PartialPosition, Square};
     /// let mut pos = PartialPosition::startpos();
     /// assert_eq!(pos.side_to_move(), Color::Black);
-    /// pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+    /// pos.make_move(Move::Normal { from: Square::SQ_7G, to: Square::SQ_7F, promote: false }).unwrap();
     /// assert_eq!(pos.side_to_move(), Color::White);
     /// ```
     #[export_name = "PartialPosition_side_to_move"]
@@ -477,9 +477,9 @@ impl PartialPosition {
     /// ```
     /// # use shogi_core::{Color, PartialPosition, Piece, PieceKind, Square};
     /// let pos = PartialPosition::startpos();
-    /// let black_rook = pos.piece_at(Square::new(2, 8).unwrap());
+    /// let black_rook = pos.piece_at(Square::SQ_2H);
     /// assert_eq!(black_rook, Some(Piece::new(PieceKind::Rook, Color::Black)));
-    /// let vacant = pos.piece_at(Square::new(3, 8).unwrap());
+    /// let vacant = pos.piece_at(Square::SQ_3H);
     /// assert_eq!(vacant, None);
     /// ```
     pub fn piece_at(&self, square: Square) -> Option<Piece> {
@@ -541,9 +541,9 @@ impl PartialPosition {
     /// # use shogi_core::{Bitboard, Color, PartialPosition, Piece, PieceKind, Square};
     /// let pos = PartialPosition::startpos();
     /// let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
-    /// assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+    /// assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
     /// let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
-    /// assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+    /// assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
     /// ```
     #[export_name = "PartialPosition_piece_bitboard"]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
@@ -757,8 +757,8 @@ mod tests {
     fn startpos_works() {
         let mut s = PartialPosition::startpos();
         let result = s.make_move(Move::Normal {
-            from: Square::new(7, 7).unwrap(),
-            to: Square::new(7, 6).unwrap(),
+            from: Square::SQ_7G,
+            to: Square::SQ_7F,
             promote: false,
         }); // 7g7f
         assert_eq!(result, Some(()));
@@ -769,20 +769,20 @@ mod tests {
         );
 
         s.make_move(Move::Normal {
-            from: Square::new(3, 3).unwrap(),
-            to: Square::new(3, 4).unwrap(),
+            from: Square::SQ_3C,
+            to: Square::SQ_3D,
             promote: false,
         })
         .unwrap(); // 3c3d
         s.make_move(Move::Normal {
-            from: Square::new(8, 8).unwrap(),
-            to: Square::new(2, 2).unwrap(),
+            from: Square::SQ_8H,
+            to: Square::SQ_2B,
             promote: true,
         })
         .unwrap(); // 8h2b+
         s.make_move(Move::Normal {
-            from: Square::new(3, 1).unwrap(),
-            to: Square::new(2, 2).unwrap(),
+            from: Square::SQ_3A,
+            to: Square::SQ_2B,
             promote: false,
         })
         .unwrap(); // 3a2b

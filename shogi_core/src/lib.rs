@@ -31,6 +31,8 @@ pub use crate::color::Color;
 #[doc(inline)]
 pub use crate::square::Square;
 
+pub use crate::square::consts;
+
 #[doc(inline)]
 pub use crate::piece_kind::PieceKind;
 

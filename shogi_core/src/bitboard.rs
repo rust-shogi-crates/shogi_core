@@ -30,7 +30,7 @@ impl Bitboard {
     /// Examples:
     /// ```
     /// use shogi_core::{Bitboard, Square};
-    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
+    /// let sq11 = Bitboard::single(Square::SQ_1A);
     /// assert_eq!(sq11.count(), 1);
     /// ```
     #[export_name = "Bitboard_single"]
@@ -46,8 +46,8 @@ impl Bitboard {
     /// Examples:
     /// ```
     /// use shogi_core::{Bitboard, Square};
-    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
-    /// let sq55 = Bitboard::single(Square::new(5, 5).unwrap());
+    /// let sq11 = Bitboard::single(Square::SQ_1A);
+    /// let sq55 = Bitboard::single(Square::SQ_5E);
     /// assert_eq!((sq11 | sq55).count(), 2);
     /// ```
     #[export_name = "Bitboard_count"]
@@ -62,8 +62,8 @@ impl Bitboard {
     /// Examples:
     /// ```
     /// use shogi_core::{Bitboard, Square};
-    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
-    /// let sq55 = Bitboard::single(Square::new(5, 5).unwrap());
+    /// let sq11 = Bitboard::single(Square::SQ_1A);
+    /// let sq55 = Bitboard::single(Square::SQ_5E);
     /// assert!(!(sq11 | sq55).is_empty());
     /// assert!(Bitboard::empty().is_empty());
     /// ```
@@ -77,9 +77,9 @@ impl Bitboard {
     /// Examples:
     /// ```
     /// use shogi_core::{Bitboard, Square};
-    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
-    /// assert!(sq11.contains(Square::new(1, 1).unwrap()));
-    /// assert!(!sq11.contains(Square::new(9, 9).unwrap()));
+    /// let sq11 = Bitboard::single(Square::SQ_1A);
+    /// assert!(sq11.contains(Square::SQ_1A));
+    /// assert!(!sq11.contains(Square::SQ_9I));
     /// ```
     #[export_name = "Bitboard_contains"]
     pub extern "C" fn contains(self, square: Square) -> bool {
@@ -98,8 +98,8 @@ impl Bitboard {
     /// Examples:
     /// ```
     /// use shogi_core::{Bitboard, Square};
-    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
-    /// let sq99 = Bitboard::single(Square::new(9, 9).unwrap());
+    /// let sq11 = Bitboard::single(Square::SQ_1A);
+    /// let sq99 = Bitboard::single(Square::SQ_9I);
     /// assert_eq!(sq11.flip(), sq99);
     /// ```
     #[export_name = "Bitboard_flip"]
@@ -117,8 +117,8 @@ impl Bitboard {
     /// Examples:
     /// ```
     /// use shogi_core::{Bitboard, Square};
-    /// let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
-    /// let sq99 = Bitboard::single(Square::new(9, 9).unwrap());
+    /// let sq11 = Bitboard::single(Square::SQ_1A);
+    /// let sq99 = Bitboard::single(Square::SQ_9I);
     /// let mut bitboard = sq11 | sq99;
     /// assert!(bitboard.pop().is_some());
     /// assert!(bitboard.pop().is_some());
