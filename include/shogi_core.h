@@ -327,7 +327,7 @@ typedef uint8_t Square;
  * # use shogi_core::{PieceKind, Square};
  * // values is long enough so values[square.index()] never panics
  * let mut values = [None; Square::NUM];
- * values[Square::new(5, 9).unwrap().array_index()] = Some(PieceKind::King);
+ * values[Square::SQ_5I.array_index()] = Some(PieceKind::King);
  * ```
  * Since: 0.1.2
  */
@@ -482,9 +482,9 @@ void Bitboard_bitxor_assign(struct Bitboard *a, struct Bitboard b);
  * Examples:
  * ```
  * use shogi_core::{Bitboard, Square};
- * let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
- * assert!(sq11.contains(Square::new(1, 1).unwrap()));
- * assert!(!sq11.contains(Square::new(9, 9).unwrap()));
+ * let sq11 = Bitboard::single(Square::SQ_1A);
+ * assert!(sq11.contains(Square::SQ_1A));
+ * assert!(!sq11.contains(Square::SQ_9I));
  * ```
  */
 bool Bitboard_contains(struct Bitboard self, Square square);
@@ -495,8 +495,8 @@ bool Bitboard_contains(struct Bitboard self, Square square);
  * Examples:
  * ```
  * use shogi_core::{Bitboard, Square};
- * let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
- * let sq55 = Bitboard::single(Square::new(5, 5).unwrap());
+ * let sq11 = Bitboard::single(Square::SQ_1A);
+ * let sq55 = Bitboard::single(Square::SQ_5E);
  * assert_eq!((sq11 | sq55).count(), 2);
  * ```
  */
@@ -520,8 +520,8 @@ struct Bitboard Bitboard_empty(void);
  * Examples:
  * ```
  * use shogi_core::{Bitboard, Square};
- * let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
- * let sq99 = Bitboard::single(Square::new(9, 9).unwrap());
+ * let sq11 = Bitboard::single(Square::SQ_1A);
+ * let sq99 = Bitboard::single(Square::SQ_9I);
  * assert_eq!(sq11.flip(), sq99);
  * ```
  */
@@ -535,8 +535,8 @@ struct Bitboard Bitboard_flip(struct Bitboard self);
  * Examples:
  * ```
  * use shogi_core::{Bitboard, Square};
- * let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
- * let sq55 = Bitboard::single(Square::new(5, 5).unwrap());
+ * let sq11 = Bitboard::single(Square::SQ_1A);
+ * let sq55 = Bitboard::single(Square::SQ_5E);
  * assert!(!(sq11 | sq55).is_empty());
  * assert!(Bitboard::empty().is_empty());
  * ```
@@ -559,7 +559,7 @@ OptionSquare Bitboard_pop(struct Bitboard *self);
  * Examples:
  * ```
  * use shogi_core::{Bitboard, Square};
- * let sq11 = Bitboard::single(Square::new(1, 1).unwrap());
+ * let sq11 = Bitboard::single(Square::SQ_1A);
  * assert_eq!(sq11.count(), 1);
  * ```
  */
@@ -584,7 +584,7 @@ Color Color_flip(Color self);
  * ```
  * # use shogi_core::{Color, CompactMove, Move, Piece, PieceKind, Square};
  * let piece = Piece::new(PieceKind::Gold, Color::White);
- * let to = Square::new(3, 4).unwrap();
+ * let to = Square::SQ_3D;
  * assert_eq!(<CompactMove as From<Move>>::from(Move::Drop { piece, to }), CompactMove::drop(piece, to));
  * ```
  */
@@ -612,8 +612,8 @@ bool CompactMove_is_promoting(CompactMove self);
  * Examples:
  * ```
  * # use shogi_core::{CompactMove, Move, Square};
- * let from = Square::new(1, 2).unwrap();
- * let to = Square::new(3, 4).unwrap();
+ * let from = Square::SQ_1B;
+ * let to = Square::SQ_3D;
  * let promote = false;
  * assert_eq!(<CompactMove as From<Move>>::from(Move::Normal { from, to, promote }), CompactMove::normal(from, to, promote));
  * ```
@@ -751,9 +751,9 @@ OptionPiece PartialPosition_piece_at(const struct PartialPosition *self, Square 
  * # use shogi_core::{Bitboard, Color, PartialPosition, Piece, PieceKind, Square};
  * let pos = PartialPosition::startpos();
  * let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
- * assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+ * assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
  * let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
- * assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+ * assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
  * ```
  */
 struct Bitboard PartialPosition_piece_bitboard(const struct PartialPosition *self, Piece piece);
@@ -776,7 +776,7 @@ uint16_t PartialPosition_ply(const struct PartialPosition *self);
  * # use shogi_core::{Color, Move, PartialPosition, Square};
  * let mut pos = PartialPosition::startpos();
  * assert_eq!(pos.side_to_move(), Color::Black);
- * pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+ * pos.make_move(Move::Normal { from: Square::SQ_7G, to: Square::SQ_7F, promote: false }).unwrap();
  * assert_eq!(pos.side_to_move(), Color::White);
  * ```
  */
@@ -902,9 +902,9 @@ OptionPiece Position_piece_at(const struct Position *self, Square square);
  * # use shogi_core::{Bitboard, Color, Piece, PieceKind, Position, Square};
  * let pos = Position::startpos();
  * let black_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::Black));
- * assert_eq!(black_rook, Bitboard::single(Square::new(2, 8).unwrap()));
+ * assert_eq!(black_rook, Bitboard::single(Square::SQ_2H));
  * let white_rook = pos.piece_bitboard(Piece::new(PieceKind::Rook, Color::White));
- * assert_eq!(white_rook, Bitboard::single(Square::new(8, 2).unwrap()));
+ * assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
  * ```
  */
 struct Bitboard Position_piece_bitboard(const struct Position *self, Piece piece);
@@ -927,7 +927,7 @@ uint16_t Position_ply(const struct Position *self);
  * # use shogi_core::{Color, Move, Position, Square};
  * let mut pos = Position::startpos();
  * assert_eq!(pos.side_to_move(), Color::Black);
- * pos.make_move(Move::Normal { from: Square::new(7, 7).unwrap(), to: Square::new(7, 6).unwrap(), promote: false }).unwrap();
+ * pos.make_move(Move::Normal { from: Square::SQ_7G, to: Square::SQ_7F, promote: false }).unwrap();
  * assert_eq!(pos.side_to_move(), Color::White);
  * ```
  */
@@ -958,7 +958,7 @@ struct Bitboard Position_vacant_bitboard(const struct Position *self);
  * Examples:
  * ```
  * use shogi_core::Square;
- * assert_eq!(Square::new(3, 4).unwrap().file(), 3);
+ * assert_eq!(Square::SQ_3D.file(), 3);
  * ```
  */
 uint8_t Square_file(Square self);
@@ -969,8 +969,8 @@ uint8_t Square_file(Square self);
  * Examples:
  * ```
  * use shogi_core::Square;
- * assert_eq!(Square::new(1, 1).unwrap().flip(), Square::new(9, 9).unwrap());
- * assert_eq!(Square::new(3, 4).unwrap().flip(), Square::new(7, 6).unwrap());
+ * assert_eq!(Square::SQ_1A.flip(), Square::SQ_9I);
+ * assert_eq!(Square::SQ_3D.flip(), Square::SQ_7F);
  * ```
  */
 Square Square_flip(Square self);
@@ -981,7 +981,7 @@ Square Square_flip(Square self);
  * Examples:
  * ```
  * use shogi_core::Square;
- * assert_eq!(Square::from_u8(21), Square::new(3, 3));
+ * assert_eq!(Square::from_u8(21), Some(Square::SQ_3C));
  * assert_eq!(Square::from_u8(0), None);
  * assert_eq!(Square::from_u8(82), None);
  * ```
@@ -1003,7 +1003,7 @@ Square Square_from_u8_unchecked(uint8_t value);
  * Examples:
  * ```
  * use shogi_core::Square;
- * assert_eq!(Square::new(3, 4).unwrap().index(), 22);
+ * assert_eq!(Square::SQ_3D.index(), 22);
  * ```
  */
 uint8_t Square_index(Square self);
@@ -1024,7 +1024,7 @@ OptionSquare Square_new_relative(uint8_t file, uint8_t rank, Color color);
  * Examples:
  * ```
  * use shogi_core::Square;
- * assert_eq!(Square::new(3, 4).unwrap().rank(), 4);
+ * assert_eq!(Square::SQ_3D.rank(), 4);
  * ```
  */
 uint8_t Square_rank(Square self);
@@ -1045,9 +1045,9 @@ uint8_t Square_relative_rank(Square self, Color color);
  * Examples:
  * ```
  * use shogi_core::Square;
- * assert_eq!(Square::new(3, 3).unwrap().shift(-1, 3), Square::new(2, 6));
- * assert_eq!(Square::new(8, 4).unwrap().shift(0, -3), Square::new(8, 1));
- * assert_eq!(Square::new(3, 3).unwrap().shift(-4, 3), None);
+ * assert_eq!(Square::SQ_3C.shift(-1, 3), Some(Square::SQ_2F));
+ * assert_eq!(Square::SQ_8D.shift(0, -3), Some(Square::SQ_8A));
+ * assert_eq!(Square::SQ_3C.shift(-4, 3), None);
  * ```
  */
 struct Option_Square Square_shift(Square self,

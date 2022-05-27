@@ -39,8 +39,8 @@ impl Square {
     /// Examples:
     /// ```
     /// use shogi_core::{Color, Square};
-    /// assert_eq!(Square::new_relative(3, 4, Color::Black), Square::new(3, 4));
-    /// assert_eq!(Square::new_relative(3, 4, Color::White), Square::new(7, 6));
+    /// assert_eq!(Square::new_relative(3, 4, Color::Black), Some(Square::SQ_3D));
+    /// assert_eq!(Square::new_relative(3, 4, Color::White), Some(Square::SQ_7F));
     /// ```
     pub const fn new_relative(file: u8, rank: u8, color: Color) -> Option<Self> {
         if file.wrapping_sub(1) >= 9 || rank.wrapping_sub(1) >= 9 {
@@ -67,7 +67,7 @@ impl Square {
     /// Examples:
     /// ```
     /// use shogi_core::Square;
-    /// assert_eq!(Square::new(3, 4).unwrap().file(), 3);
+    /// assert_eq!(Square::SQ_3D.file(), 3);
     /// ```
     #[export_name = "Square_file"]
     pub extern "C" fn file(self) -> u8 {
@@ -79,7 +79,7 @@ impl Square {
     /// Examples:
     /// ```
     /// use shogi_core::Square;
-    /// assert_eq!(Square::new(3, 4).unwrap().rank(), 4);
+    /// assert_eq!(Square::SQ_3D.rank(), 4);
     /// ```
     #[export_name = "Square_rank"]
     pub extern "C" fn rank(self) -> u8 {
@@ -92,7 +92,7 @@ impl Square {
     /// Examples:
     /// ```
     /// use shogi_core::Square;
-    /// assert_eq!(Square::new(3, 4).unwrap().index(), 22);
+    /// assert_eq!(Square::SQ_3D.index(), 22);
     /// ```
     #[inline(always)]
     #[export_name = "Square_index"]
@@ -125,8 +125,8 @@ impl Square {
     /// Examples:
     /// ```
     /// use shogi_core::Square;
-    /// assert_eq!(Square::new(1, 1).unwrap().flip(), Square::new(9, 9).unwrap());
-    /// assert_eq!(Square::new(3, 4).unwrap().flip(), Square::new(7, 6).unwrap());
+    /// assert_eq!(Square::SQ_1A.flip(), Square::SQ_9I);
+    /// assert_eq!(Square::SQ_3D.flip(), Square::SQ_7F);
     /// ```
     #[export_name = "Square_flip"]
     pub extern "C" fn flip(self) -> Self {
@@ -139,7 +139,7 @@ impl Square {
     /// Examples:
     /// ```
     /// use shogi_core::Square;
-    /// assert_eq!(Square::from_u8(21), Square::new(3, 3));
+    /// assert_eq!(Square::from_u8(21), Some(Square::SQ_3C));
     /// assert_eq!(Square::from_u8(0), None);
     /// assert_eq!(Square::from_u8(82), None);
     /// ```
@@ -182,9 +182,9 @@ impl Square {
     /// Examples:
     /// ```
     /// use shogi_core::Square;
-    /// assert_eq!(Square::new(3, 3).unwrap().shift(-1, 3), Square::new(2, 6));
-    /// assert_eq!(Square::new(8, 4).unwrap().shift(0, -3), Square::new(8, 1));
-    /// assert_eq!(Square::new(3, 3).unwrap().shift(-4, 3), None);
+    /// assert_eq!(Square::SQ_3C.shift(-1, 3), Some(Square::SQ_2F));
+    /// assert_eq!(Square::SQ_8D.shift(0, -3), Some(Square::SQ_8A));
+    /// assert_eq!(Square::SQ_3C.shift(-4, 3), None);
     /// ```
     #[export_name = "Square_shift"]
     pub extern "C" fn shift(self, file_delta: i8, rank_delta: i8) -> Option<Self> {
@@ -212,7 +212,7 @@ impl Square {
     /// # use shogi_core::{PieceKind, Square};
     /// // values is long enough so values[square.index()] never panics
     /// let mut values = [None; Square::NUM];
-    /// values[Square::new(5, 9).unwrap().array_index()] = Some(PieceKind::King);
+    /// values[Square::SQ_5I.array_index()] = Some(PieceKind::King);
     /// ```
     /// Since: 0.1.2
     pub const NUM: usize = 81;

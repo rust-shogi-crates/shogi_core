@@ -33,8 +33,8 @@ impl Move {
     /// Examples:
     /// ```
     /// # use shogi_core::{Color, Move, Piece, PieceKind, Square};
-    /// assert_eq!(Move::Normal { from: Square::new(1, 2).unwrap(), to: Square::new(3, 4).unwrap(), promote: false}.from(), Square::new(1, 2));
-    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::new(3, 4).unwrap() }.from(), None);
+    /// assert_eq!(Move::Normal { from: Square::SQ_1B, to: Square::SQ_3D, promote: false}.from(), Some(Square::SQ_1B));
+    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::SQ_3D }.from(), None);
     /// ```
     pub fn from(self) -> Option<Square> {
         match self {
@@ -48,8 +48,8 @@ impl Move {
     /// Examples:
     /// ```
     /// # use shogi_core::{Color, Move, Piece, PieceKind, Square};
-    /// assert_eq!(Move::Normal { from: Square::new(1, 2).unwrap(), to: Square::new(3, 4).unwrap(), promote: false}.to(), Square::new(3, 4).unwrap());
-    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::new(4, 5).unwrap() }.to(), Square::new(4, 5).unwrap());
+    /// assert_eq!(Move::Normal { from: Square::SQ_1B, to: Square::SQ_3D, promote: false}.to(), Square::SQ_3D);
+    /// assert_eq!(Move::Drop { piece: Piece::new(PieceKind::Pawn, Color::Black), to: Square::SQ_4E }.to(), Square::SQ_4E);
     /// ```
     pub fn to(self) -> Square {
         match self {
@@ -179,8 +179,8 @@ impl CompactMove {
     /// Examples:
     /// ```
     /// # use shogi_core::{CompactMove, Move, Square};
-    /// let from = Square::new(1, 2).unwrap();
-    /// let to = Square::new(3, 4).unwrap();
+    /// let from = Square::SQ_1B;
+    /// let to = Square::SQ_3D;
     /// let promote = false;
     /// assert_eq!(<CompactMove as From<Move>>::from(Move::Normal { from, to, promote }), CompactMove::normal(from, to, promote));
     /// ```
@@ -197,7 +197,7 @@ impl CompactMove {
     /// ```
     /// # use shogi_core::{Color, CompactMove, Move, Piece, PieceKind, Square};
     /// let piece = Piece::new(PieceKind::Gold, Color::White);
-    /// let to = Square::new(3, 4).unwrap();
+    /// let to = Square::SQ_3D;
     /// assert_eq!(<CompactMove as From<Move>>::from(Move::Drop { piece, to }), CompactMove::drop(piece, to));
     /// ```
     #[export_name = "CompactMove_drop"]
