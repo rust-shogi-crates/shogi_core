@@ -270,6 +270,18 @@ impl Position {
         self.inner.last_compact_move()
     }
 
+    /// Returns all moves made so far.
+    ///
+    /// Examples:
+    /// ```
+    /// use shogi_core::Position;
+    /// assert_eq!(Position::startpos().moves(), []);
+    /// ```
+    /// Since: 0.1.2
+    pub fn moves(&self) -> &[Move] {
+        &self.moves
+    }
+
     /// C interface to [`Position::last_compact_move`].
     #[no_mangle]
     pub extern "C" fn Position_last_compact_move(&self) -> OptionCompactMove {
