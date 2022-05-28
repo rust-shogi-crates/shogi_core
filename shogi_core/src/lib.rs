@@ -87,6 +87,8 @@ pub mod c_compat {
 }
 
 /// Constant values.
+///
+/// Since: 0.1.2
 pub mod consts {
     include!(concat!(env!("OUT_DIR"), "/piece_consts.rs"));
     include!(concat!(env!("OUT_DIR"), "/square_consts.rs"));
