@@ -157,7 +157,9 @@ impl PieceKind {
     ///
     /// If `repr` is a valid representation of [`PieceKind`], this function returns `Some(piece_kind)`.
     /// This condition is equivalent to `1 <= repr && repr <= 14`.
-    pub fn from_u8(repr: u8) -> Option<Self> {
+    ///
+    /// `const`: since 0.1.2
+    pub const fn from_u8(repr: u8) -> Option<Self> {
         if matches!(repr, 1..=14) {
             // Safety: `repr` is in range `1..=14`.
             Some(unsafe { Self::from_u8_unchecked(repr) })
@@ -177,9 +179,21 @@ impl PieceKind {
     /// # Safety
     /// `repr` must be a valid representation of [`PieceKind`].
     /// This condition is equivalent to `1 <= repr && repr <= 14`.
-    #[export_name = "PieceKind_from_u8_unchecked"]
+    ///
+    /// `const`: since 0.1.2
     #[inline(always)]
-    pub unsafe extern "C" fn from_u8_unchecked(repr: u8) -> Self {
+    pub const unsafe fn from_u8_unchecked(repr: u8) -> Self {
+        core::mem::transmute(repr)
+    }
+
+    /// C interface to [`PieceKind::from_u8_unchecked`].
+    ///
+    /// # Safety
+    /// `repr` must be a valid representation of [`PieceKind`].
+    /// This condition is equivalent to `1 <= repr && repr <= 14`.
+    #[no_mangle]
+    #[inline(always)]
+    pub unsafe extern "C" fn PieceKind_from_u8_unchecked(repr: u8) -> Self {
         core::mem::transmute(repr)
     }
 

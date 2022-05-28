@@ -139,6 +139,52 @@ impl Hand {
         // Safety: `sizeof::<[u8; 8]>()` = `sizeof::<u64>()` = 8
         unsafe { core::mem::transmute(self) }
     }
+
+    /// Returns whether a [`PieceKind`] is valid as a piece in hand.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Hand, PieceKind};
+    /// assert!(Hand::all_hand_pieces().all(Hand::is_hand_piece));
+    /// assert_eq!(PieceKind::all().into_iter().filter(|&x| Hand::is_hand_piece(x)).count(), Hand::NUM_HAND_PIECES);
+    /// ```
+    /// Since: 0.1.2
+    #[inline]
+    pub const fn is_hand_piece(piece_kind: PieceKind) -> bool {
+        // 7 bytes, shortest possible machine code for this function in x86_64 (System V AMD64 ABI)
+        // 40 80 ff 08  cmpb $8, %dil
+        // 0f 92 c0     setb %al
+        (piece_kind as u8) < 8
+    }
+    #[no_mangle]
+    extern "C" fn Hand_is_hand_piece(piece_kind: PieceKind) -> bool {
+        Hand::is_hand_piece(piece_kind)
+    }
+
+    /// Returns all valid pieces in hand in the ascending order of their discriminants.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{PieceKind, Hand};
+    /// let all: Vec<PieceKind> = Hand::all_hand_pieces().collect();
+    /// assert_eq!(all, [PieceKind::Pawn, PieceKind::Lance, PieceKind::Knight, PieceKind::Silver, PieceKind::Gold, PieceKind::Bishop, PieceKind::Rook]);
+    /// ```
+    /// Since: 0.1.2
+    #[inline]
+    pub fn all_hand_pieces() -> impl Iterator<Item = PieceKind> {
+        // Safety: repr is in 1..=14.
+        (1..8).map(|repr| unsafe { PieceKind::from_u8_unchecked(repr) })
+    }
+
+    /// The number of all valid pieces in hand.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::Hand;
+    /// assert_eq!(Hand::all_hand_pieces().count(), Hand::NUM_HAND_PIECES);
+    /// ```
+    /// Since: 0.1.2
+    pub const NUM_HAND_PIECES: usize = 7;
 }
 
 impl PartialEq for Hand {
