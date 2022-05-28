@@ -414,6 +414,17 @@ typedef uint8_t OptionGameResolution;
 typedef struct Hand {
   uint8_t _0[8];
 } Hand;
+/**
+ * The number of all valid pieces in hand.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::Hand;
+ * assert_eq!(Hand::all_hand_pieces().count(), Hand::NUM_HAND_PIECES);
+ * ```
+ * Since: 0.1.2
+ */
+#define Hand_NUM_HAND_PIECES 7
 
 /**
  * C-compatible type for <code>[Option]<[Piece]></code> with defined representations.
@@ -807,7 +818,7 @@ struct Bitboard PartialPosition_vacant_bitboard(const struct PartialPosition *se
 OptionPieceKind PieceKind_from_u8(uint8_t repr);
 
 /**
- * Converts a [`u8`] to [`PieceKind`] without checking.
+ * C interface to [`PieceKind::from_u8_unchecked`].
  *
  * # Safety
  * `repr` must be a valid representation of [`PieceKind`].
