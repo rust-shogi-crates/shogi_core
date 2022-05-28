@@ -174,6 +174,10 @@ impl Position {
     ///
     /// This function makes no guarantee about the consistency of the position.
     /// Users should have a good reason when using it. Exported for parsers.
+    #[deprecated(
+        since = "0.1.2",
+        note = "This function can create inconsistent states. It will be removed in 0.2.0."
+    )]
     pub fn hand_of_a_player_mut(&mut self, color: Color) -> &mut Hand {
         self.inner.hand_of_a_player_mut(color)
     }
@@ -216,6 +220,10 @@ impl Position {
     ///
     /// This function makes no guarantee about the consistency of the position.
     /// Users should have a good reason when using it.
+    #[deprecated(
+        since = "0.1.2",
+        note = "This function can create inconsistent states. It will be removed in 0.2.0."
+    )]
     pub fn piece_set(&mut self, square: Square, piece: Option<Piece>) {
         self.inner.piece_set(square, piece)
     }
