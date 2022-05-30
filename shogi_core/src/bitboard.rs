@@ -20,9 +20,15 @@ impl Bitboard {
     /// let empty = Bitboard::empty();
     /// assert_eq!(empty.count(), 0);
     /// ```
-    #[export_name = "Bitboard_empty"]
-    pub extern "C" fn empty() -> Self {
-        Self::default()
+    /// `const`: since 0.1.3
+    pub const fn empty() -> Self {
+        Self([0; 2])
+    }
+
+    /// C interface to [`Bitboard::empty`].
+    #[no_mangle]
+    pub extern "C" fn Bitboard_empty() -> Self {
+        Self::empty()
     }
 
     /// Creates a [`Bitboard`] with a single element.
@@ -33,12 +39,18 @@ impl Bitboard {
     /// let sq11 = Bitboard::single(Square::SQ_1A);
     /// assert_eq!(sq11.count(), 1);
     /// ```
-    #[export_name = "Bitboard_single"]
-    pub extern "C" fn single(square: Square) -> Self {
-        let index = square.index() - 1;
+    /// `const`: since 0.1.3
+    pub const fn single(square: Square) -> Self {
+        let index = square.array_index();
         let value = 1 << (index % 64);
         let inner = if index < 64 { [value, 0] } else { [0, value] };
         Self(inner)
+    }
+
+    /// C interface to [`Bitboard::single`].
+    #[no_mangle]
+    pub extern "C" fn Bitboard_single(square: Square) -> Self {
+        Self::single(square)
     }
 
     /// Finds how many elements this [`Bitboard`] has.
@@ -149,6 +161,43 @@ impl Bitboard {
     #[no_mangle]
     pub extern "C" fn Bitboard_pop(&mut self) -> OptionSquare {
         self.pop().into()
+    }
+
+    /// Creates a new bitboard with a single file populated.
+    ///
+    /// Safety:
+    /// 1 <= file <= 9, 0 <= pattern < 512
+    pub const unsafe fn from_file(file: u8, pattern: u16) -> Self {
+        let mut data = [0; 2];
+        if file <= 7 {
+            data[0] = (pattern as u64) << ((file - 1) * 9);
+        } else if file == 8 {
+            data[0] = (pattern as u64) << 63;
+            data[1] = (pattern as u64) >> 1;
+        } else {
+            data[1] = (pattern as u64) << 8;
+        }
+        Self(data)
+    }
+
+    /// Bitwise or.
+    pub const fn or(self, other: Self) -> Self {
+        Self([self.0[0] | other.0[0], self.0[1] | other.0[1]])
+    }
+
+    /// Bitwise and.
+    pub const fn and(self, other: Self) -> Self {
+        Self([self.0[0] & other.0[0], self.0[1] & other.0[1]])
+    }
+
+    /// Bitwise xor.
+    pub const fn xor(self, other: Self) -> Self {
+        Self([self.0[0] ^ other.0[0], self.0[1] ^ other.0[1]])
+    }
+
+    /// Bitwise andnot (`!self & others`).
+    pub const fn andnot(self, other: Self) -> Self {
+        Self([!self.0[0] & other.0[0], !self.0[1] & other.0[1]])
     }
 }
 
@@ -356,6 +405,23 @@ mod tests {
                 let result2 = bitboard.pop().unwrap();
                 assert!((result1, result2) == (sq1, sq2) || (result1, result2) == (sq2, sq1));
                 assert!(bitboard.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn from_file_works() {
+        for file in 1..=9 {
+            for pattern in 0..512 {
+                let result = unsafe { Bitboard::from_file(file, pattern) };
+                let mut inner = 0;
+                for rank in 1..=9 {
+                    if result.contains(Square::new(file, rank).unwrap()) {
+                        inner |= 1 << (rank - 1);
+                    }
+                }
+                assert_eq!(pattern, inner);
+                assert_eq!(result.count() as u32, pattern.count_ones());
             }
         }
     }

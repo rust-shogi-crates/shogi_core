@@ -457,6 +457,7 @@ typedef struct PartialPosition {
   uint16_t ply;
   struct Hand hands[2];
   OptionPiece board[81];
+  struct Bitboard player_bb[2];
   OptionCompactMove last_move;
 } PartialPosition;
 
@@ -514,14 +515,7 @@ bool Bitboard_contains(struct Bitboard self, Square square);
 uint8_t Bitboard_count(struct Bitboard self);
 
 /**
- * Creates an empty [`Bitboard`].
- *
- * Examples:
- * ```
- * use shogi_core::Bitboard;
- * let empty = Bitboard::empty();
- * assert_eq!(empty.count(), 0);
- * ```
+ * C interface to [`Bitboard::empty`].
  */
 struct Bitboard Bitboard_empty(void);
 
@@ -565,14 +559,7 @@ struct Bitboard Bitboard_not(struct Bitboard a);
 OptionSquare Bitboard_pop(struct Bitboard *self);
 
 /**
- * Creates a [`Bitboard`] with a single element.
- *
- * Examples:
- * ```
- * use shogi_core::{Bitboard, Square};
- * let sq11 = Bitboard::single(Square::SQ_1A);
- * assert_eq!(sq11.count(), 1);
- * ```
+ * C interface to [`Bitboard::single`].
  */
 struct Bitboard Bitboard_single(Square square);
 

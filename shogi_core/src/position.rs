@@ -369,6 +369,7 @@ pub struct PartialPosition {
     ply: u16,
     hands: [Hand; 2],
     board: [OptionPiece; 81],
+    player_bb: [Bitboard; 2],
     last_move: OptionCompactMove,
 }
 
@@ -380,9 +381,38 @@ impl PartialPosition {
             ply: 1,
             hands: [Default::default(); 2],
             board: [None.into(); 81],
+            player_bb: [Bitboard::empty(); 2],
             last_move: None.into(),
         }
     }
+
+    const STARTPOS_BLACK_BB: Bitboard = {
+        let mut result = Bitboard::empty();
+        let mut i = 0;
+        while i < 9 {
+            // Safety: i+1 is in range 1..=9.
+            let file = unsafe { Bitboard::from_file(i as u8 + 1, 1 << 8 | 1 << 6) };
+            result = result.or(file);
+            i += 1;
+        }
+        result = result.or(Bitboard::single(Square::SQ_2H));
+        result = result.or(Bitboard::single(Square::SQ_8H));
+        result
+    };
+
+    const STARTPOS_WHITE_BB: Bitboard = {
+        let mut result = Bitboard::empty();
+        let mut i = 0;
+        while i < 9 {
+            // Safety: i+1 is in range 1..=9.
+            let file = unsafe { Bitboard::from_file(i as u8 + 1, 1 << 2 | 1) };
+            result = result.or(file);
+            i += 1;
+        }
+        result = result.or(Bitboard::single(Square::SQ_2B));
+        result = result.or(Bitboard::single(Square::SQ_8B));
+        result
+    };
 
     /// Returns the starting position of shogi.
     pub fn startpos() -> Self {
@@ -419,6 +449,7 @@ impl PartialPosition {
             ply: 1,
             hands: [Default::default(); 2],
             board,
+            player_bb: [Self::STARTPOS_BLACK_BB, Self::STARTPOS_WHITE_BB],
             last_move: None.into(),
         }
     }
@@ -522,36 +553,29 @@ impl PartialPosition {
         let index = square.index() - 1;
         // Safety: square.index() is in range 1..=81
         *unsafe { self.board.get_unchecked_mut(index as usize) } = piece.into();
+        self.player_bb[0] &= !Bitboard::single(square);
+        self.player_bb[1] &= !Bitboard::single(square);
+        if let Some((_, color)) = piece.map(Piece::to_parts) {
+            match color {
+                Color::Black => self.player_bb[0] |= square,
+                Color::White => self.player_bb[1] |= square,
+            }
+        }
     }
 
     /// Finds the subset of squares with no pieces.
     #[export_name = "PartialPosition_vacant_bitboard"]
     pub extern "C" fn vacant_bitboard(&self) -> Bitboard {
-        // TODO: optimize to allow O(1)-time retrieval
-        let mut result = Bitboard::empty();
-        for i in 0..81 {
-            if Option::<Piece>::from(self.board[i]).is_none() {
-                let square = unsafe { Square::from_u8_unchecked(i as u8 + 1) };
-                result |= Bitboard::single(square);
-            }
-        }
-        result
+        !(self.player_bb[0] | self.player_bb[1])
     }
 
     /// Finds the subset of squares where a piece of the specified player is placed.
     #[export_name = "PartialPosition_player_bitboard"]
     pub extern "C" fn player_bitboard(&self, color: Color) -> Bitboard {
-        // TODO: optimize to allow O(1)-time retrieval
-        let mut result = Bitboard::empty();
-        for i in 0..81 {
-            if let Some(piece) = Option::<Piece>::from(self.board[i]) {
-                if piece.color() == color {
-                    let square = unsafe { Square::from_u8_unchecked(i as u8 + 1) };
-                    result |= Bitboard::single(square);
-                }
-            }
+        match color {
+            Color::Black => self.player_bb[0],
+            Color::White => self.player_bb[1],
         }
-        result
     }
 
     /// Finds the subset of squares where a piece is placed.
