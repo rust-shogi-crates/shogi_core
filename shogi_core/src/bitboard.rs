@@ -163,11 +163,38 @@ impl Bitboard {
         self.pop().into()
     }
 
+    /// Returns the inner representation of `self`.
+    ///
+    /// Inner representation of [`Bitboard`] is unstable;
+    /// however, `Bitboard::from_u128_unchecked(bb.to_u128()) == bb` always holds.
+    ///
+    /// Since: 0.1.3
+    #[inline(always)]
+    pub const fn to_u128(self) -> u128 {
+        // As little endian
+        (self.0[1] as u128) << 64 | self.0[0] as u128
+    }
+
+    /// Creates a [`Bitboard`] with the given inner representation.
+    ///
+    /// Inner representation of [`Bitboard`] is unstable;
+    /// however, `Bitboard::from_u128_unchecked(bb.to_u128()) == bb` always holds.
+    ///
+    /// # Safety
+    /// `a` must be a valid representation of a [`Bitboard`].
+    ///
+    /// Since: 0.1.3
+    pub const unsafe fn from_u128_unchecked(a: u128) -> Self {
+        let v0 = a as u64;
+        let v1 = (a >> 64) as u64;
+        Self([v0, v1])
+    }
+
     /// Creates a new bitboard with a single file populated.
     ///
-    /// Safety:
+    /// # Safety
     /// 1 <= file <= 9, 0 <= pattern < 512
-    pub const unsafe fn from_file(file: u8, pattern: u16) -> Self {
+    pub const unsafe fn from_file_unchecked(file: u8, pattern: u16) -> Self {
         let mut data = [0; 2];
         if file <= 7 {
             data[0] = (pattern as u64) << ((file - 1) * 9);
@@ -178,6 +205,30 @@ impl Bitboard {
             data[1] = (pattern as u64) << 8;
         }
         Self(data)
+    }
+
+    /// Finds the pattern in a file.
+    ///
+    /// # Safety
+    /// 1 <= file <= 9
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Bitboard, Square};
+    /// let bitboard = Bitboard::single(Square::SQ_7G);
+    /// assert_eq!(unsafe { bitboard.get_file_unchecked(7) }, 1 << 6);
+    /// let bitboard = Bitboard::single(Square::SQ_8G) | Bitboard::single(Square::SQ_8H);
+    /// assert_eq!(unsafe { bitboard.get_file_unchecked(8) }, 1 << 7 | 1 << 6);
+    /// ```
+    pub const unsafe fn get_file_unchecked(self, file: u8) -> u16 {
+        let pattern = if file <= 7 {
+            self.0[0] >> ((file - 1) * 9)
+        } else if file == 8 {
+            self.0[0] >> 63 | self.0[1] << 1
+        } else {
+            self.0[1] >> 8
+        };
+        pattern as u16 & 0x1ff
     }
 
     /// Bitwise or.
@@ -413,7 +464,7 @@ mod tests {
     fn from_file_works() {
         for file in 1..=9 {
             for pattern in 0..512 {
-                let result = unsafe { Bitboard::from_file(file, pattern) };
+                let result = unsafe { Bitboard::from_file_unchecked(file, pattern) };
                 let mut inner = 0;
                 for rank in 1..=9 {
                     if result.contains(Square::new(file, rank).unwrap()) {

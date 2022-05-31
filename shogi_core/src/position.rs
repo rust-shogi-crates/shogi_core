@@ -391,7 +391,7 @@ impl PartialPosition {
         let mut i = 0;
         while i < 9 {
             // Safety: i+1 is in range 1..=9.
-            let file = unsafe { Bitboard::from_file(i as u8 + 1, 1 << 8 | 1 << 6) };
+            let file = unsafe { Bitboard::from_file_unchecked(i as u8 + 1, 1 << 8 | 1 << 6) };
             result = result.or(file);
             i += 1;
         }
@@ -405,7 +405,7 @@ impl PartialPosition {
         let mut i = 0;
         while i < 9 {
             // Safety: i+1 is in range 1..=9.
-            let file = unsafe { Bitboard::from_file(i as u8 + 1, 1 << 2 | 1) };
+            let file = unsafe { Bitboard::from_file_unchecked(i as u8 + 1, 1 << 2 | 1) };
             result = result.or(file);
             i += 1;
         }
