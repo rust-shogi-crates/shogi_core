@@ -47,7 +47,7 @@ pub use crate::mv::CompactMove;
 pub use crate::hand::Hand;
 
 #[doc(inline)]
-pub use crate::bitboard::Bitboard;
+pub use crate::bitboard::{Bitboard, ByteSwappedBitboard};
 
 #[doc(inline)]
 pub use crate::game_resolution::GameResolution;

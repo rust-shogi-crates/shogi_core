@@ -194,6 +194,8 @@ impl Bitboard {
     ///
     /// # Safety
     /// 1 <= file <= 9, 0 <= pattern < 512
+    ///
+    /// Since: 0.1.3
     pub const unsafe fn from_file_unchecked(file: u8, pattern: u16) -> Self {
         let mut data = [0; 2];
         if file <= 7 {
@@ -220,6 +222,7 @@ impl Bitboard {
     /// let bitboard = Bitboard::single(Square::SQ_8G) | Bitboard::single(Square::SQ_8H);
     /// assert_eq!(unsafe { bitboard.get_file_unchecked(8) }, 1 << 7 | 1 << 6);
     /// ```
+    /// Since: 0.1.3
     pub const unsafe fn get_file_unchecked(self, file: u8) -> u16 {
         let pattern = if file <= 7 {
             self.0[0] >> ((file - 1) * 9)
@@ -232,23 +235,38 @@ impl Bitboard {
     }
 
     /// Bitwise or.
+    ///
+    /// Since: 0.1.3
     pub const fn or(self, other: Self) -> Self {
         Self([self.0[0] | other.0[0], self.0[1] | other.0[1]])
     }
 
     /// Bitwise and.
+    ///
+    /// Since: 0.1.3
     pub const fn and(self, other: Self) -> Self {
         Self([self.0[0] & other.0[0], self.0[1] & other.0[1]])
     }
 
     /// Bitwise xor.
+    ///
+    /// Since: 0.1.3
     pub const fn xor(self, other: Self) -> Self {
         Self([self.0[0] ^ other.0[0], self.0[1] ^ other.0[1]])
     }
 
     /// Bitwise andnot (`!self & others`).
+    ///
+    /// Since: 0.1.3
     pub const fn andnot(self, other: Self) -> Self {
         Self([!self.0[0] & other.0[0], !self.0[1] & other.0[1]])
+    }
+
+    /// Byte-wise reversing.
+    ///
+    /// Since: 0.1.3
+    pub const fn swap_bytes(self) -> ByteSwappedBitboard {
+        ByteSwappedBitboard([self.0[1].swap_bytes(), self.0[0].swap_bytes()])
     }
 }
 
@@ -408,6 +426,77 @@ pub extern "C" fn Bitboard_not(a: Bitboard) -> Bitboard {
 
 impl_ord_for_single_field!(Bitboard);
 impl_hash_for_single_field!(Bitboard);
+
+/// A [`Bitboard`] with its all bytes reversed.
+///
+/// Since: 0.1.3
+#[repr(C)]
+#[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
+pub struct ByteSwappedBitboard([u64; 2]);
+
+impl ByteSwappedBitboard {
+    /// Returns the inner representation of `self`.
+    ///
+    /// Inner representation of [`ByteSwappedBitboard`] is unstable;
+    /// however, `ByteSwappedBitboard::from_u128_unchecked(swapped_bb.to_u128()) == bb` always holds.
+    #[inline(always)]
+    pub const fn to_u128(self) -> u128 {
+        // As little endian
+        (self.0[1] as u128) << 64 | self.0[0] as u128
+    }
+
+    /// Creates a [`Bitboard`] with the given inner representation.
+    ///
+    /// Inner representation of [`ByteSwappedBitboard`] is unstable;
+    /// however, `ByteSwappedBitboard::from_u128_unchecked(swapped_bb.to_u128()) == bb` always holds.
+    ///
+    /// # Safety
+    /// `a` must be a valid representation of a [`ByteSwappedBitboard`].
+    pub const unsafe fn from_u128_unchecked(a: u128) -> Self {
+        let v0 = a as u64;
+        let v1 = (a >> 64) as u64;
+        Self([v0, v1])
+    }
+
+    /// Bitwise or.
+    ///
+    /// Since: 0.1.3
+    pub const fn or(self, other: Self) -> Self {
+        Self([self.0[0] | other.0[0], self.0[1] | other.0[1]])
+    }
+
+    /// Bitwise and.
+    ///
+    /// Since: 0.1.3
+    pub const fn and(self, other: Self) -> Self {
+        Self([self.0[0] & other.0[0], self.0[1] & other.0[1]])
+    }
+
+    /// Bitwise xor.
+    ///
+    /// Since: 0.1.3
+    pub const fn xor(self, other: Self) -> Self {
+        Self([self.0[0] ^ other.0[0], self.0[1] ^ other.0[1]])
+    }
+
+    /// Bitwise andnot (`!self & others`).
+    ///
+    /// Since: 0.1.3
+    pub const fn andnot(self, other: Self) -> Self {
+        Self([!self.0[0] & other.0[0], !self.0[1] & other.0[1]])
+    }
+
+    /// Byte-wise reversing.
+    ///
+    /// Since: 0.1.3
+    #[inline(always)]
+    pub const fn swap_bytes(self) -> Bitboard {
+        Bitboard([self.0[1].swap_bytes(), self.0[0].swap_bytes()])
+    }
+}
+
+impl_ord_for_single_field!(ByteSwappedBitboard);
+impl_hash_for_single_field!(ByteSwappedBitboard);
 
 #[cfg(test)]
 mod tests {
