@@ -370,6 +370,7 @@ pub struct PartialPosition {
     hands: [Hand; 2],
     board: [OptionPiece; 81],
     player_bb: [Bitboard; 2],
+    piece_bb: [Bitboard; PieceKind::NUM],
     last_move: OptionCompactMove,
 }
 
@@ -382,6 +383,7 @@ impl PartialPosition {
             hands: [Default::default(); 2],
             board: [None.into(); 81],
             player_bb: [Bitboard::empty(); 2],
+            piece_bb: [Bitboard::empty(); PieceKind::NUM],
             last_move: None.into(),
         }
     }
@@ -417,7 +419,7 @@ impl PartialPosition {
     /// Returns the starting position of shogi.
     pub fn startpos() -> Self {
         // TODO stop panicking
-        let mut board = [None.into(); 81];
+        let mut board: [OptionPiece; 81] = [None.into(); 81];
         // Pawns
         for i in 0..9 {
             board[6 + i * 9] = Some(Piece::B_P).into();
@@ -444,12 +446,22 @@ impl PartialPosition {
             board[8 + 9 * i] = Some(Piece::new(order[i], Color::Black)).into();
             board[9 * i] = Some(Piece::new(order[i], Color::White)).into();
         }
+        let mut piece_bb = [Bitboard::empty(); PieceKind::NUM];
+        for square in Square::all() {
+            if let Some(piece) =
+                <Option<Piece>>::from(*unsafe { board.get_unchecked(square.array_index()) })
+            {
+                let piece_kind = piece.piece_kind();
+                piece_bb[piece_kind.array_index()] |= square;
+            }
+        }
         Self {
             side: Color::Black,
             ply: 1,
             hands: [Default::default(); 2],
             board,
             player_bb: [Self::STARTPOS_BLACK_BB, Self::STARTPOS_WHITE_BB],
+            piece_bb,
             last_move: None.into(),
         }
     }
@@ -551,6 +563,7 @@ impl PartialPosition {
     /// Users should have a good reason when using it. Exported for parsers.
     pub fn piece_set(&mut self, square: Square, piece: Option<Piece>) {
         let index = square.index() - 1;
+        let old = self.piece_at(square);
         // Safety: square.index() is in range 1..=81
         *unsafe { self.board.get_unchecked_mut(index as usize) } = piece.into();
         self.player_bb[0] &= !Bitboard::single(square);
@@ -560,6 +573,14 @@ impl PartialPosition {
                 Color::Black => self.player_bb[0] |= square,
                 Color::White => self.player_bb[1] |= square,
             }
+        }
+        if let Some(piece) = old {
+            let piece_kind = piece.piece_kind();
+            self.piece_bb[piece_kind.array_index()] &= !Bitboard::single(square);
+        }
+        if let Some(piece) = piece {
+            let piece_kind = piece.piece_kind();
+            self.piece_bb[piece_kind.array_index()] |= square;
         }
     }
 
@@ -591,15 +612,8 @@ impl PartialPosition {
     /// ```
     #[export_name = "PartialPosition_piece_bitboard"]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
-        // TODO: optimize to allow O(1)-time retrieval
-        let mut result = Bitboard::empty();
-        for i in 0..81 {
-            if self.board[i] == Some(piece).into() {
-                let square = unsafe { Square::from_u8_unchecked(i as u8 + 1) };
-                result |= Bitboard::single(square);
-            }
-        }
-        result
+        let (piece_kind, color) = piece.to_parts();
+        self.piece_bb[piece_kind.array_index()] & self.player_bb[color.array_index()]
     }
 
     /// Returns the last move, if it exists.
