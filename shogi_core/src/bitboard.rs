@@ -8,7 +8,7 @@ use crate::{c_compat::OptionSquare, Square};
 /// Its [`Default`] value is an empty instance.
 #[repr(C)]
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Default)]
-// Valid representation: self.0[1] >> 17 must be equal to 0.
+// Valid representation: self.0[0] >> 63 and self.0[1] >> 18 must be equal to 0.
 pub struct Bitboard([u64; 2]);
 
 impl Bitboard {
@@ -42,8 +42,11 @@ impl Bitboard {
     /// `const`: since 0.1.3
     pub const fn single(square: Square) -> Self {
         let index = square.array_index();
-        let value = 1 << (index % 64);
-        let inner = if index < 64 { [value, 0] } else { [0, value] };
+        let inner = if index < 63 {
+            [1 << index, 0]
+        } else {
+            [0, 1 << (index - 63)]
+        };
         Self(inner)
     }
 
@@ -96,11 +99,10 @@ impl Bitboard {
     #[export_name = "Bitboard_contains"]
     pub extern "C" fn contains(self, square: Square) -> bool {
         let index = square.index() - 1;
-        let value = 1 << (index % 64);
-        let overlap = if index < 64 {
-            self.0[0] & value
+        let overlap = if index < 63 {
+            self.0[0] & 1 << index
         } else {
-            self.0[1] & value
+            self.0[1] & 1 << (index - 63)
         };
         overlap != 0
     }
@@ -116,8 +118,8 @@ impl Bitboard {
     /// ```
     #[export_name = "Bitboard_flip"]
     pub extern "C" fn flip(self) -> Self {
-        let fst_rev = (self.0[0] >> 17) | (self.0[1] << 47);
-        let snd_rev = self.0[0] << 47;
+        let fst_rev = ((self.0[0] >> 17) | (self.0[1] << 46)) & !1;
+        let snd_rev = self.0[0] << 46;
         let returned = [fst_rev.reverse_bits(), snd_rev.reverse_bits()];
         Self(returned)
     }
@@ -140,7 +142,7 @@ impl Bitboard {
     pub fn pop(&mut self) -> Option<Square> {
         if self.0[0] != 0 {
             let index = self.0[0].trailing_zeros() + 1;
-            // Safety: 1 <= index <= 64
+            // Safety: 1 <= index <= 63
             let square = unsafe { Square::from_u8_unchecked(index as u8) };
             debug_assert!(self.contains(square));
             *self ^= square;
@@ -149,8 +151,8 @@ impl Bitboard {
         if self.0[1] == 0 {
             return None;
         }
-        let index = self.0[1].trailing_zeros() + 64 + 1;
-        // Safety: `65 <= index <= 81` holds because `self.0[1] & 0x1ffff` is not zero
+        let index = self.0[1].trailing_zeros() + 63 + 1;
+        // Safety: `64 <= index <= 81` holds because `self.0[1] & 0x1ffff` is not zero
         let square = unsafe { Square::from_u8_unchecked(index as u8) };
         debug_assert!(self.contains(square));
         *self ^= square;
@@ -200,11 +202,8 @@ impl Bitboard {
         let mut data = [0; 2];
         if file <= 7 {
             data[0] = (pattern as u64) << ((file - 1) * 9);
-        } else if file == 8 {
-            data[0] = (pattern as u64) << 63;
-            data[1] = (pattern as u64) >> 1;
         } else {
-            data[1] = (pattern as u64) << 8;
+            data[1] = (pattern as u64) << ((file - 8) * 9);
         }
         Self(data)
     }
@@ -226,10 +225,8 @@ impl Bitboard {
     pub const unsafe fn get_file_unchecked(self, file: u8) -> u16 {
         let pattern = if file <= 7 {
             self.0[0] >> ((file - 1) * 9)
-        } else if file == 8 {
-            self.0[0] >> 63 | self.0[1] << 1
         } else {
-            self.0[1] >> 8
+            self.0[1] >> ((file - 8) * 9)
         };
         pattern as u16 & 0x1ff
     }
@@ -397,7 +394,7 @@ impl Not for Bitboard {
     /// assert_eq!((!Bitboard::empty()).count(), 81);
     /// ```
     fn not(self) -> Self::Output {
-        Self([!self.0[0], !self.0[1] & ((1 << 17) - 1)])
+        Self([!self.0[0] & ((1 << 63) - 1), !self.0[1] & ((1 << 18) - 1)])
     }
 }
 
