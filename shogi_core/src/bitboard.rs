@@ -12,6 +12,9 @@ use crate::{c_compat::OptionSquare, Square};
 pub struct Bitboard([u64; 2]);
 
 impl Bitboard {
+    const MASK0: u64 = (1 << 63) - 1;
+    const MASK1: u64 = (1 << 18) - 1;
+
     /// Creates an empty [`Bitboard`].
     ///
     /// Examples:
@@ -265,6 +268,81 @@ impl Bitboard {
     pub const fn swap_bytes(self) -> ByteSwappedBitboard {
         ByteSwappedBitboard([self.0[1].swap_bytes(), self.0[0].swap_bytes()])
     }
+
+    /// Shifts a [`Bitboard`] downwards.
+    ///
+    /// # Safety
+    /// `delta` must be in `0..=9`.
+    ///
+    /// Since: 0.1.3
+    pub const unsafe fn shift_down(self, delta: u8) -> Self {
+        debug_assert!(delta <= 9);
+        let top0 = 0x8040_2010_0804_0200u64;
+        let top1 = 0x4_0200u64;
+        let mask0 = top0 - (top0 >> (9 - delta));
+        let mask1 = top1 - (top1 >> (9 - delta));
+        Self([self.0[0] << delta & mask0, self.0[1] << delta & mask1])
+    }
+
+    /// Shifts a [`Bitboard`] upwards.
+    ///
+    /// # Safety
+    /// `delta` must be in `0..=9`.
+    ///
+    /// Since: 0.1.3
+    pub const unsafe fn shift_up(self, delta: u8) -> Self {
+        debug_assert!(delta <= 9);
+        let bottom0 = 0x40_2010_0804_0201u64;
+        let bottom1 = 0x201u64;
+        let mask0 = (bottom0 << (9 - delta)) - bottom0;
+        let mask1 = (bottom1 << (9 - delta)) - bottom1;
+        Self([self.0[0] >> delta & mask0, self.0[1] >> delta & mask1])
+    }
+
+    /// Shifts a [`Bitboard`] left.
+    ///
+    /// # Safety
+    /// `delta` must be in `0..=9`.
+    ///
+    /// Since: 0.1.3
+    pub const unsafe fn shift_left(self, delta: u8) -> Self {
+        debug_assert!(delta <= 9);
+        let data = if delta <= 1 {
+            [
+                self.0[0] << (9 * delta) & Self::MASK0,
+                (self.0[1] << (9 * delta) | self.0[0] >> (63 - 9 * delta)) & Self::MASK1,
+            ]
+        } else if delta <= 7 {
+            [
+                self.0[0] << (9 * delta) & Self::MASK0,
+                self.0[0] >> (63 - 9 * delta) & Self::MASK1,
+            ]
+        } else {
+            [0, self.0[0] << (9 * delta - 63) & Self::MASK1]
+        };
+        Self(data)
+    }
+
+    /// Shifts a [`Bitboard`] right.
+    ///
+    /// # Safety
+    /// `delta` must be in `0..=9`.
+    ///
+    /// Since: 0.1.3
+    pub const unsafe fn shift_right(self, delta: u8) -> Self {
+        debug_assert!(delta <= 9);
+        let data = if delta <= 1 {
+            [
+                self.0[0] >> (9 * delta) | self.0[1] << (63 - 9 * delta),
+                self.0[1] >> (9 * delta),
+            ]
+        } else if delta <= 7 {
+            [self.0[0] >> (9 * delta) | self.0[1] << (63 - 9 * delta), 0]
+        } else {
+            [self.0[1] >> (9 * delta - 63), 0]
+        };
+        Self(data)
+    }
 }
 
 impl Iterator for Bitboard {
@@ -499,6 +577,21 @@ impl_hash_for_single_field!(ByteSwappedBitboard);
 mod tests {
     use super::*;
 
+    // '.': vacant, '*': occupied
+    fn from_strs(a: [&[u8; 9]; 9]) -> Bitboard {
+        let mut result = Bitboard::empty();
+        for rank in 1..=9 {
+            for file in 1..=9 {
+                if a[rank - 1][9 - file] == b'*' {
+                    result |= Square::new(file as u8, rank as u8).unwrap();
+                } else {
+                    assert_eq!(a[rank - 1][9 - file], b'.');
+                }
+            }
+        }
+        result
+    }
+
     #[test]
     fn contains_works() {
         for file in 1..=9 {
@@ -559,7 +652,126 @@ mod tests {
                 }
                 assert_eq!(pattern, inner);
                 assert_eq!(result.count() as u32, pattern.count_ones());
+                assert_eq!(unsafe { result.get_file_unchecked(file) }, pattern);
             }
+        }
+    }
+
+    #[test]
+    fn shift_down_works() {
+        let init_str = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"***......",
+            b"***....**",
+        ];
+        let init = from_strs(init_str);
+        assert_eq!(unsafe { init.shift_down(0) }, init);
+        for i in 0..=9 {
+            let mut expected = [b"........."; 9];
+            expected[i..].copy_from_slice(&init_str[..9 - i]);
+            let expected = from_strs(expected);
+            let result = unsafe { init.shift_down(i as u8) };
+            assert_eq!(result, expected);
+        }
+    }
+
+    #[test]
+    fn shift_up_works() {
+        let init_str = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"***......",
+            b"***....**",
+        ];
+        let init = from_strs(init_str);
+        assert_eq!(unsafe { init.shift_up(0) }, init);
+        for i in 0..=9 {
+            let mut expected = [b"........."; 9];
+            expected[..9 - i].copy_from_slice(&init_str[i..]);
+            let expected = from_strs(expected);
+            let result = unsafe { init.shift_up(i as u8) };
+            assert_eq!(result, expected);
+        }
+    }
+
+    #[test]
+    fn shift_left_works() {
+        let init = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"****.....",
+            b"***....**",
+        ];
+        let init = from_strs(init);
+        let result = unsafe { init.shift_left(3) };
+        let expected = [
+            b"...***...",
+            b"....**...",
+            b".*..**...",
+            b".*...*...",
+            b".........",
+            b".*...*...",
+            b".........",
+            b"*........",
+            b"....**...",
+        ];
+        let expected = from_strs(expected);
+        assert_eq!(result, expected);
+        assert_eq!(unsafe { init.shift_left(0) }, init);
+        for i in 0..=9 {
+            let result = unsafe { init.shift_left(i) };
+            assert_eq!(result, result);
+        }
+    }
+
+    #[test]
+    fn shift_right_works() {
+        let init = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"***......",
+            b"***....**",
+        ];
+        let init = from_strs(init);
+        let result = unsafe { init.shift_right(3) };
+        let expected = [
+            b"...*.....",
+            b".........",
+            b".......*.",
+            b"...*...*.",
+            b".........",
+            b"...*.*.*.",
+            b"...**....",
+            b"...***...",
+            b"...***...",
+        ];
+        let expected = from_strs(expected);
+        assert_eq!(result, expected);
+        assert_eq!(unsafe { init.shift_right(0) }, init);
+        for i in 0..=9 {
+            let result = unsafe { init.shift_right(i) };
+            assert_eq!(result, result);
         }
     }
 }
