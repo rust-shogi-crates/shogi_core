@@ -759,6 +759,20 @@ OptionPiece PartialPosition_piece_at(const struct PartialPosition *self, Square 
 struct Bitboard PartialPosition_piece_bitboard(const struct PartialPosition *self, Piece piece);
 
 /**
+ * Finds the subset of squares where a [`PieceKind`] is placed.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Bitboard, Color, PartialPosition, PieceKind, Square};
+ * let pos = PartialPosition::startpos();
+ * let rooks = pos.piece_kind_bitboard(PieceKind::Rook);
+ * assert_eq!(rooks, Bitboard::single(Square::SQ_2H) | Bitboard::single(Square::SQ_8B));
+ * ```
+ */
+struct Bitboard PartialPosition_piece_kind_bitboard(const struct PartialPosition *self,
+                                                    PieceKind piece_kind);
+
+/**
  * Finds the subset of squares where a piece of the specified player is placed.
  */
 struct Bitboard PartialPosition_player_bitboard(const struct PartialPosition *self, Color color);

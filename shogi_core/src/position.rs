@@ -601,11 +601,9 @@ impl PartialPosition {
 
     /// Finds the subset of squares where a piece of the specified player is placed.
     #[export_name = "PartialPosition_player_bitboard"]
+    #[inline(always)]
     pub extern "C" fn player_bitboard(&self, color: Color) -> Bitboard {
-        match color {
-            Color::Black => self.player_bb[0],
-            Color::White => self.player_bb[1],
-        }
+        self.player_bb[color.array_index()]
     }
 
     /// Finds the subset of squares where a piece is placed.
@@ -623,6 +621,21 @@ impl PartialPosition {
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
         let (piece_kind, color) = piece.to_parts();
         self.piece_bb[piece_kind.array_index()] & self.player_bb[color.array_index()]
+    }
+
+    /// Finds the subset of squares where a [`PieceKind`] is placed.
+    ///
+    /// Examples:
+    /// ```
+    /// # use shogi_core::{Bitboard, Color, PartialPosition, PieceKind, Square};
+    /// let pos = PartialPosition::startpos();
+    /// let rooks = pos.piece_kind_bitboard(PieceKind::Rook);
+    /// assert_eq!(rooks, Bitboard::single(Square::SQ_2H) | Bitboard::single(Square::SQ_8B));
+    /// ```
+    #[export_name = "PartialPosition_piece_kind_bitboard"]
+    #[inline(always)]
+    pub extern "C" fn piece_kind_bitboard(&self, piece_kind: PieceKind) -> Bitboard {
+        self.piece_bb[piece_kind.array_index()]
     }
 
     /// Returns the last move, if it exists.
