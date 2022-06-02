@@ -658,6 +658,31 @@ mod tests {
         }
     }
 
+    #[cfg(bench)]
+    #[bench]
+    fn pop_bench(b: &mut test::Bencher) {
+        let init = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"****.....",
+            b"***....**",
+        ];
+        let init = from_strs(init);
+        let count = init.count();
+        b.iter(|| {
+            let mut result = 0;
+            for _square in init {
+                result += 1;
+            }
+            assert_eq!(result, count);
+        });
+    }
+
     #[test]
     fn from_file_works() {
         for file in 1..=9 {
@@ -700,6 +725,37 @@ mod tests {
         }
     }
 
+    #[cfg(bench)]
+    #[bench]
+    fn shift_down_bench(b: &mut test::Bencher) {
+        let init_str = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"****.....",
+            b"***....**",
+        ];
+        let init = from_strs(init_str);
+        let mut expected = vec![];
+        for i in 0..10 {
+            expected.push(unsafe { init.shift_down(i) });
+        }
+        b.iter(|| {
+            let mut x = 0u8;
+            for _ in 0..1000 {
+                x = x.wrapping_mul(13).wrapping_add(9);
+                let result = test::bench::black_box(unsafe {
+                    test::bench::black_box(init).shift_down(x % 10)
+                });
+                assert_eq!(result, expected[(x % 10) as usize]);
+            }
+        });
+    }
+
     #[test]
     fn shift_up_works() {
         let init_str = [
@@ -722,6 +778,37 @@ mod tests {
             let result = unsafe { init.shift_up(i as u8) };
             assert_eq!(result, expected);
         }
+    }
+
+    #[cfg(bench)]
+    #[bench]
+    fn shift_up_bench(b: &mut test::Bencher) {
+        let init_str = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"****.....",
+            b"***....**",
+        ];
+        let init = from_strs(init_str);
+        let mut expected = vec![];
+        for i in 0..10 {
+            expected.push(unsafe { init.shift_up(i) });
+        }
+        b.iter(|| {
+            let mut x = 0u8;
+            for _ in 0..1000 {
+                x = x.wrapping_mul(13).wrapping_add(9);
+                let result = test::bench::black_box(unsafe {
+                    test::bench::black_box(init).shift_up(x % 10)
+                });
+                assert_eq!(result, expected[(x % 10) as usize]);
+            }
+        });
     }
 
     #[test]
@@ -759,6 +846,35 @@ mod tests {
         }
     }
 
+    #[cfg(bench)]
+    #[bench]
+    fn shift_left_bench(b: &mut test::Bencher) {
+        let init = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"****.....",
+            b"***....**",
+        ];
+        let init = from_strs(init);
+        let mut expected = vec![];
+        for i in 0..10 {
+            expected.push(unsafe { init.shift_left(i) });
+        }
+        b.iter(|| {
+            let mut x = 0u8;
+            for _ in 0..1000 {
+                x = x.wrapping_mul(13).wrapping_add(9);
+                let result = unsafe { test::bench::black_box(init).shift_left(x % 10) };
+                assert_eq!(result, expected[(x % 10) as usize]);
+            }
+        });
+    }
+
     #[test]
     fn shift_right_works() {
         let init = [
@@ -792,5 +908,36 @@ mod tests {
             let result = unsafe { init.shift_right(i) };
             assert_eq!(result, result);
         }
+    }
+
+    #[cfg(bench)]
+    #[bench]
+    fn shift_right_bench(b: &mut test::Bencher) {
+        let init = [
+            b"*.....***",
+            b".......**",
+            b"....*..**",
+            b"*...*...*",
+            b".........",
+            b"*.*.*...*",
+            b"**.......",
+            b"****.....",
+            b"***....**",
+        ];
+        let init = from_strs(init);
+        let mut expected = vec![];
+        for i in 0..10 {
+            expected.push(unsafe { init.shift_right(i) });
+        }
+        b.iter(|| {
+            let mut x = 0u8;
+            for _ in 0..1000 {
+                x = x.wrapping_mul(13).wrapping_add(9);
+                let result = test::bench::black_box(unsafe {
+                    test::bench::black_box(init).shift_right(x % 10)
+                });
+                assert_eq!(result, expected[(x % 10) as usize]);
+            }
+        });
     }
 }
