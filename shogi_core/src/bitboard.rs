@@ -279,11 +279,12 @@ impl Bitboard {
     /// Since: 0.1.3
     pub const unsafe fn shift_down(self, delta: u8) -> Self {
         debug_assert!(delta <= 9);
-        let top0 = 0x8040_2010_0804_0200u64;
-        let top1 = 0x4_0200u64;
-        let mask0 = top0 - (top0 >> (9 - delta));
-        let mask1 = top1 - (top1 >> (9 - delta));
-        Self([self.0[0] << delta & mask0, self.0[1] << delta & mask1])
+        let top = 0x8040_2010_0804_0200u64;
+        let mask = top - (top >> (9 - delta));
+        Self([
+            self.0[0] << delta & mask,
+            ((self.0[1] as u32) << delta & mask as u32) as u64,
+        ])
     }
 
     /// Shifts a [`Bitboard`] upwards.
@@ -294,11 +295,12 @@ impl Bitboard {
     /// Since: 0.1.3
     pub const unsafe fn shift_up(self, delta: u8) -> Self {
         debug_assert!(delta <= 9);
-        let bottom0 = 0x40_2010_0804_0201u64;
-        let bottom1 = 0x201u64;
-        let mask0 = (bottom0 << (9 - delta)) - bottom0;
-        let mask1 = (bottom1 << (9 - delta)) - bottom1;
-        Self([self.0[0] >> delta & mask0, self.0[1] >> delta & mask1])
+        let bottom = 0x40_2010_0804_0201u64;
+        let mask = (bottom << (9 - delta)) - bottom;
+        Self([
+            self.0[0] >> delta & mask,
+            (self.0[1] as u32 >> delta & mask as u32) as u64,
+        ])
     }
 
     /// Shifts a [`Bitboard`] left.
