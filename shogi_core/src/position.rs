@@ -548,12 +548,14 @@ impl PartialPosition {
     /// let vacant = pos.piece_at(Square::SQ_3H);
     /// assert_eq!(vacant, None);
     /// ```
+    #[inline(always)]
     pub fn piece_at(&self, square: Square) -> Option<Piece> {
         self.PartialPosition_piece_at(square).into()
     }
 
     /// C interface to [`PartialPosition::piece_at`].
     #[no_mangle]
+    #[inline(always)]
     pub extern "C" fn PartialPosition_piece_at(&self, square: Square) -> OptionPiece {
         let index = square.index() - 1;
         // Safety: square.index() is in range 1..=81
@@ -595,6 +597,7 @@ impl PartialPosition {
 
     /// Finds the subset of squares with no pieces.
     #[export_name = "PartialPosition_vacant_bitboard"]
+    #[inline(always)]
     pub extern "C" fn vacant_bitboard(&self) -> Bitboard {
         !(self.player_bb[0] | self.player_bb[1])
     }
@@ -618,6 +621,7 @@ impl PartialPosition {
     /// assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
     /// ```
     #[export_name = "PartialPosition_piece_bitboard"]
+    #[inline(always)]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
         let (piece_kind, color) = piece.to_parts();
         self.piece_bb[piece_kind.array_index()] & self.player_bb[color.array_index()]

@@ -24,6 +24,7 @@ impl Bitboard {
     /// assert_eq!(empty.count(), 0);
     /// ```
     /// `const`: since 0.1.3
+    #[inline(always)]
     pub const fn empty() -> Self {
         Self([0; 2])
     }
@@ -69,6 +70,7 @@ impl Bitboard {
     /// assert_eq!((sq11 | sq55).count(), 2);
     /// ```
     #[export_name = "Bitboard_count"]
+    #[inline(always)]
     pub extern "C" fn count(self) -> u8 {
         (self.0[0].count_ones() + self.0[1].count_ones()) as u8
     }
@@ -86,6 +88,7 @@ impl Bitboard {
     /// assert!(Bitboard::empty().is_empty());
     /// ```
     #[export_name = "Bitboard_is_empty"]
+    #[inline(always)]
     pub extern "C" fn is_empty(self) -> bool {
         self.0 == [0; 2]
     }
@@ -361,6 +364,7 @@ macro_rules! define_bit_trait {
         impl $trait for Bitboard {
             type Output = Self;
 
+            #[inline(always)]
             fn $funname(self, rhs: Self) -> Self::Output {
                 Self([self.0[0] $op rhs.0[0], self.0[1] $op rhs.0[1]])
             }
@@ -369,6 +373,7 @@ macro_rules! define_bit_trait {
         impl $trait<&'_ Bitboard> for Bitboard {
             type Output = Bitboard;
 
+            #[inline(always)]
             fn $funname(self, rhs: &Self) -> Self::Output {
                 self $op *rhs
             }
@@ -376,6 +381,7 @@ macro_rules! define_bit_trait {
         impl $trait<Bitboard> for &'_ Bitboard {
             type Output = Bitboard;
 
+            #[inline(always)]
             fn $funname(self, rhs: Bitboard) -> Self::Output {
                 *self $op rhs
             }
@@ -383,26 +389,31 @@ macro_rules! define_bit_trait {
         impl $trait<&'_ Bitboard> for &'_ Bitboard {
             type Output = Bitboard;
 
+            #[inline(always)]
             fn $funname(self, rhs: &Bitboard) -> Self::Output {
                 *self $op *rhs
             }
         }
         impl $assign_trait for Bitboard {
+            #[inline(always)]
             fn $assign_funname(&mut self, rhs: Self) {
                 *self = *self $op rhs;
             }
         }
         impl $assign_trait<&'_ Bitboard> for Bitboard {
+            #[inline(always)]
             fn $assign_funname(&mut self, rhs: &Self) {
                 *self = *self $op *rhs;
             }
         }
         impl $assign_trait<Square> for Bitboard {
+            #[inline(always)]
             fn $assign_funname(&mut self, rhs: Square) {
                 *self = *self $op Bitboard::single(rhs);
             }
         }
         impl $assign_trait<&'_ Square> for Bitboard {
+            #[inline(always)]
             fn $assign_funname(&mut self, rhs: &Square) {
                 *self = *self $op Bitboard::single(*rhs);
             }
@@ -470,6 +481,7 @@ impl Not for Bitboard {
     /// use shogi_core::Bitboard;
     /// assert_eq!((!Bitboard::empty()).count(), 81);
     /// ```
+    #[inline(always)]
     fn not(self) -> Self::Output {
         Self([!self.0[0] & ((1 << 63) - 1), !self.0[1] & ((1 << 18) - 1)])
     }
@@ -487,6 +499,7 @@ impl Not for &'_ Bitboard {
     /// use shogi_core::Bitboard;
     /// assert_eq!((!&Bitboard::empty()).count(), 81);
     /// ```
+    #[inline(always)]
     fn not(self) -> Self::Output {
         !*self
     }
@@ -526,6 +539,9 @@ impl ByteSwappedBitboard {
     ///
     /// # Safety
     /// `a` must be a valid representation of a [`ByteSwappedBitboard`].
+    ///
+    /// Since: 0.1.3
+    #[inline(always)]
     pub const unsafe fn from_u128_unchecked(a: u128) -> Self {
         let v0 = a as u64;
         let v1 = (a >> 64) as u64;
@@ -535,6 +551,7 @@ impl ByteSwappedBitboard {
     /// Bitwise or.
     ///
     /// Since: 0.1.3
+    #[inline(always)]
     pub const fn or(self, other: Self) -> Self {
         Self([self.0[0] | other.0[0], self.0[1] | other.0[1]])
     }
@@ -542,6 +559,7 @@ impl ByteSwappedBitboard {
     /// Bitwise and.
     ///
     /// Since: 0.1.3
+    #[inline(always)]
     pub const fn and(self, other: Self) -> Self {
         Self([self.0[0] & other.0[0], self.0[1] & other.0[1]])
     }
@@ -549,6 +567,7 @@ impl ByteSwappedBitboard {
     /// Bitwise xor.
     ///
     /// Since: 0.1.3
+    #[inline(always)]
     pub const fn xor(self, other: Self) -> Self {
         Self([self.0[0] ^ other.0[0], self.0[1] ^ other.0[1]])
     }
@@ -556,6 +575,7 @@ impl ByteSwappedBitboard {
     /// Bitwise andnot (`!self & others`).
     ///
     /// Since: 0.1.3
+    #[inline(always)]
     pub const fn andnot(self, other: Self) -> Self {
         Self([!self.0[0] & other.0[0], !self.0[1] & other.0[1]])
     }
