@@ -143,22 +143,21 @@ impl Bitboard {
     /// assert!(bitboard.is_empty());
     /// ```
     pub fn pop(&mut self) -> Option<Square> {
-        if self.0[0] != 0 {
-            let index = self.0[0].trailing_zeros() + 1;
-            // Safety: 1 <= index <= 63
-            let square = unsafe { Square::from_u8_unchecked(index as u8) };
-            debug_assert!(self.contains(square));
-            *self ^= square;
-            return Some(square);
-        }
-        if self.0[1] == 0 {
+        let repr = self.to_u128();
+        if repr == 0 {
             return None;
         }
-        let index = self.0[1].trailing_zeros() + 63 + 1;
-        // Safety: `64 <= index <= 81` holds because `self.0[1] & 0x1ffff` is not zero
-        let square = unsafe { Square::from_u8_unchecked(index as u8) };
+        let pos = repr.trailing_zeros();
+        let square = if pos < 63 {
+            // Safety: 1 <= pos+1 <= 63
+            unsafe { Square::from_u8_unchecked(pos as u8 + 1) }
+        } else {
+            // Safety: 63 <= pos < 81
+            unsafe { Square::from_u8_unchecked(pos as u8) }
+        };
         debug_assert!(self.contains(square));
-        *self ^= square;
+        let newrepr = repr & repr.wrapping_sub(1);
+        *self = unsafe { Self::from_u128_unchecked(newrepr) };
         Some(square)
     }
 
