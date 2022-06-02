@@ -458,8 +458,9 @@ typedef struct PartialPosition {
   struct Hand hands[2];
   OptionPiece board[81];
   struct Bitboard player_bb[2];
-  struct Bitboard piece_bb[NUM];
+  struct Bitboard piece_bb[14];
   OptionCompactMove last_move;
+  OptionSquare king_square[2];
 } PartialPosition;
 
 /**

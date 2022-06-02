@@ -1,7 +1,7 @@
 use core::fmt::{Result as FmtResult, Write};
 use core::mem::MaybeUninit;
 
-use crate::c_compat::{OptionCompactMove, OptionGameResolution, OptionPiece};
+use crate::c_compat::{OptionCompactMove, OptionGameResolution, OptionPiece, OptionSquare};
 use crate::common::{write_ascii_byte, write_u16, write_u8};
 use crate::{
     Bitboard, Color, CompactMove, GameResolution, Hand, Move, Piece, PieceKind, Square, ToUsi,
@@ -370,8 +370,9 @@ pub struct PartialPosition {
     hands: [Hand; 2],
     board: [OptionPiece; 81],
     player_bb: [Bitboard; 2],
-    piece_bb: [Bitboard; PieceKind::NUM],
+    piece_bb: [Bitboard; 14],
     last_move: OptionCompactMove,
+    king_square: [OptionSquare; 2],
 }
 
 impl PartialPosition {
@@ -385,6 +386,7 @@ impl PartialPosition {
             player_bb: [Bitboard::empty(); 2],
             piece_bb: [Bitboard::empty(); PieceKind::NUM],
             last_move: None.into(),
+            king_square: [None.into(); Color::NUM],
         }
     }
 
@@ -463,6 +465,7 @@ impl PartialPosition {
             player_bb: [Self::STARTPOS_BLACK_BB, Self::STARTPOS_WHITE_BB],
             piece_bb,
             last_move: None.into(),
+            king_square: [Some(Square::SQ_5I).into(), Some(Square::SQ_5A).into()],
         }
     }
 
@@ -582,6 +585,12 @@ impl PartialPosition {
             let piece_kind = piece.piece_kind();
             self.piece_bb[piece_kind.array_index()] |= square;
         }
+        if piece == Some(Piece::B_K) {
+            self.king_square[0] = Some(square).into();
+        }
+        if piece == Some(Piece::W_K) {
+            self.king_square[1] = Some(square).into();
+        }
     }
 
     /// Finds the subset of squares with no pieces.
@@ -642,6 +651,11 @@ impl PartialPosition {
     #[no_mangle]
     pub extern "C" fn PartialPosition_last_compact_move(&self) -> OptionCompactMove {
         self.last_move
+    }
+
+    #[inline(always)]
+    pub fn king_position(&self, color: Color) -> Option<Square> {
+        self.king_square[color.array_index()].into()
     }
 
     /// Makes a move. Note that this function will never check legality.
