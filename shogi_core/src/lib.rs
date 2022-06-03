@@ -1,6 +1,10 @@
 #![cfg_attr(not(test), no_std)] // Forbids using std::*.
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![cfg_attr(bench, feature(test))]
 #![doc = include_str!("../README.md")]
+
+#[cfg(bench)]
+extern crate test;
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -47,7 +51,7 @@ pub use crate::mv::CompactMove;
 pub use crate::hand::Hand;
 
 #[doc(inline)]
-pub use crate::bitboard::Bitboard;
+pub use crate::bitboard::{Bitboard, ByteSwappedBitboard};
 
 #[doc(inline)]
 pub use crate::game_resolution::GameResolution;

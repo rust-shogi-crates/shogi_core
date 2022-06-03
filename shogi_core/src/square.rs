@@ -15,6 +15,7 @@ impl Square {
     ///
     /// `file` and `rank` must be between 1 and 9 (both inclusive).
     /// If this condition is not met, this function returns None.
+    #[inline(always)]
     pub const fn new(file: u8, rank: u8) -> Option<Self> {
         if file.wrapping_sub(1) >= 9 || rank.wrapping_sub(1) >= 9 {
             return None;
@@ -69,6 +70,7 @@ impl Square {
     /// use shogi_core::Square;
     /// assert_eq!(Square::SQ_3D.file(), 3);
     /// ```
+    #[inline(always)]
     #[export_name = "Square_file"]
     pub extern "C" fn file(self) -> u8 {
         (self.0.get() + 8) / 9
@@ -81,6 +83,7 @@ impl Square {
     /// use shogi_core::Square;
     /// assert_eq!(Square::SQ_3D.rank(), 4);
     /// ```
+    #[inline(always)]
     #[export_name = "Square_rank"]
     pub extern "C" fn rank(self) -> u8 {
         ((self.0.get() - 1) % 9) + 1
@@ -128,6 +131,7 @@ impl Square {
     /// assert_eq!(Square::SQ_1A.flip(), Square::SQ_9I);
     /// assert_eq!(Square::SQ_3D.flip(), Square::SQ_7F);
     /// ```
+    #[inline(always)]
     #[export_name = "Square_flip"]
     pub extern "C" fn flip(self) -> Self {
         // Safety: self.0.get() is in range 1..=81.
@@ -200,7 +204,7 @@ impl Square {
     /// Returns the index of `self` for array accesses. This function returns an integer in range `0..Square::MAX`.
     ///
     /// Since: 0.1.2
-    #[inline]
+    #[inline(always)]
     pub const fn array_index(self) -> usize {
         (self.0.get() - 1) as usize
     }

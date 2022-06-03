@@ -457,7 +457,10 @@ typedef struct PartialPosition {
   uint16_t ply;
   struct Hand hands[2];
   OptionPiece board[81];
+  struct Bitboard player_bb[2];
+  struct Bitboard piece_bb[14];
   OptionCompactMove last_move;
+  OptionSquare king_square[2];
 } PartialPosition;
 
 /**
@@ -514,14 +517,7 @@ bool Bitboard_contains(struct Bitboard self, Square square);
 uint8_t Bitboard_count(struct Bitboard self);
 
 /**
- * Creates an empty [`Bitboard`].
- *
- * Examples:
- * ```
- * use shogi_core::Bitboard;
- * let empty = Bitboard::empty();
- * assert_eq!(empty.count(), 0);
- * ```
+ * C interface to [`Bitboard::empty`].
  */
 struct Bitboard Bitboard_empty(void);
 
@@ -565,14 +561,7 @@ struct Bitboard Bitboard_not(struct Bitboard a);
 OptionSquare Bitboard_pop(struct Bitboard *self);
 
 /**
- * Creates a [`Bitboard`] with a single element.
- *
- * Examples:
- * ```
- * use shogi_core::{Bitboard, Square};
- * let sq11 = Bitboard::single(Square::SQ_1A);
- * assert_eq!(sq11.count(), 1);
- * ```
+ * C interface to [`Bitboard::single`].
  */
 struct Bitboard Bitboard_single(Square square);
 
@@ -768,6 +757,20 @@ OptionPiece PartialPosition_piece_at(const struct PartialPosition *self, Square 
  * ```
  */
 struct Bitboard PartialPosition_piece_bitboard(const struct PartialPosition *self, Piece piece);
+
+/**
+ * Finds the subset of squares where a [`PieceKind`] is placed.
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::{Bitboard, Color, PartialPosition, PieceKind, Square};
+ * let pos = PartialPosition::startpos();
+ * let rooks = pos.piece_kind_bitboard(PieceKind::Rook);
+ * assert_eq!(rooks, Bitboard::single(Square::SQ_2H) | Bitboard::single(Square::SQ_8B));
+ * ```
+ */
+struct Bitboard PartialPosition_piece_kind_bitboard(const struct PartialPosition *self,
+                                                    PieceKind piece_kind);
 
 /**
  * Finds the subset of squares where a piece of the specified player is placed.

@@ -41,3 +41,15 @@ jobs:
         cargo build --verbose --all-features
     - name: Document
       run: cargo doc --verbose
+    - name: benchmark
+      run: ./bench.sh | tee gha-bench.txt
+    - name: Store benchmark results
+      uses: benchmark-action/github-action-benchmark@v1
+      with:
+        name: Benchmark result (shogi_legality_lite)
+        tool: cargo
+        output-file-path: gha-bench.txt
+        auto-push: false
+    - name: Push benchmark result
+      run: git push 'https://github-actions:${{ secrets.GITHUB_TOKEN }}@github.com/rust-shogi-crates/shogi_legality_lite.git' gh-pages:gh-pages
+      if: github.event_name != 'pull_request'
