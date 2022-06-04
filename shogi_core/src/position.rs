@@ -486,17 +486,20 @@ impl PartialPosition {
     /// assert_eq!(pos.side_to_move(), Color::White);
     /// ```
     #[export_name = "PartialPosition_side_to_move"]
+    #[inline(always)]
     pub extern "C" fn side_to_move(&self) -> Color {
         self.side
     }
 
     /// Sets which player is to move.
+    #[inline(always)]
     pub fn side_to_move_set(&mut self, side: Color) {
         self.side = side;
     }
 
     /// Returns the [`Hand`] of a player.
     #[export_name = "PartialPosition_hand_of_a_player"]
+    #[inline(always)]
     pub extern "C" fn hand_of_a_player(&self, color: Color) -> Hand {
         // Safety: color as usize is either 1 or 2
         *unsafe { self.hands.get_unchecked((color as u8 - 1) as usize) }
@@ -506,6 +509,7 @@ impl PartialPosition {
     ///
     /// This function makes no guarantee about the consistency of the position.
     /// Users should have a good reason when using it. Exported for parsers.
+    #[inline(always)]
     pub fn hand_of_a_player_mut(&mut self, color: Color) -> &mut Hand {
         // Safety: color as usize is either 1 or 2
         unsafe { self.hands.get_unchecked_mut((color as u8 - 1) as usize) }
@@ -571,27 +575,29 @@ impl PartialPosition {
         let old = self.piece_at(square);
         // Safety: square.index() is in range 1..=81
         *unsafe { self.board.get_unchecked_mut(index as usize) } = piece.into();
-        self.player_bb[0] &= !Bitboard::single(square);
-        self.player_bb[1] &= !Bitboard::single(square);
+        let single = Bitboard::single_inlined(square);
+        self.player_bb[0] = single.andnot(self.player_bb[0]);
+        self.player_bb[1] = single.andnot(self.player_bb[1]);
         if let Some((_, color)) = piece.map(Piece::to_parts) {
             match color {
-                Color::Black => self.player_bb[0] |= square,
-                Color::White => self.player_bb[1] |= square,
+                Color::Black => self.player_bb[0] |= single,
+                Color::White => self.player_bb[1] |= single,
             }
         }
         if let Some(piece) = old {
             let piece_kind = piece.piece_kind();
-            self.piece_bb[piece_kind.array_index()] &= !Bitboard::single(square);
+            self.piece_bb[piece_kind.array_index()] =
+                single.andnot(self.piece_bb[piece_kind.array_index()]);
         }
         if let Some(piece) = piece {
             let piece_kind = piece.piece_kind();
-            self.piece_bb[piece_kind.array_index()] |= square;
-        }
-        if piece == Some(Piece::B_K) {
-            self.king_square[0] = Some(square).into();
-        }
-        if piece == Some(Piece::W_K) {
-            self.king_square[1] = Some(square).into();
+            self.piece_bb[piece_kind.array_index()] |= single;
+            if let Piece::B_K = piece {
+                self.king_square[0] = Some(square).into();
+            }
+            if let Piece::W_K = piece {
+                self.king_square[1] = Some(square).into();
+            }
         }
     }
 
