@@ -44,7 +44,13 @@ impl Bitboard {
     /// assert_eq!(sq11.count(), 1);
     /// ```
     /// `const`: since 0.1.3
+    #[inline]
     pub const fn single(square: Square) -> Self {
+        Self::single_inlined(square)
+    }
+
+    #[inline(always)]
+    pub(crate) const fn single_inlined(square: Square) -> Self {
         let index = square.array_index();
         let inner = if index < 63 {
             [1 << index, 0]

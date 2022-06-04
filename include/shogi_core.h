@@ -670,6 +670,8 @@ bool Hand_add(struct Hand *self, PieceKind piece_kind);
  */
 uint8_t Hand_count(struct Hand self, PieceKind piece_kind);
 
+bool Hand_is_hand_piece(PieceKind piece_kind);
+
 /**
  * Creates an empty instance of [`Hand`].
  *

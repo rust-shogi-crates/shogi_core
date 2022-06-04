@@ -156,8 +156,9 @@ impl Hand {
         // 0f 92 c0     setb %al
         (piece_kind as u8) < 8
     }
+    #[doc(hidden)]
     #[no_mangle]
-    extern "C" fn Hand_is_hand_piece(piece_kind: PieceKind) -> bool {
+    pub extern "C" fn Hand_is_hand_piece(piece_kind: PieceKind) -> bool {
         Hand::is_hand_piece(piece_kind)
     }
 

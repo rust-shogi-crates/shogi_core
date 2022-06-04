@@ -73,7 +73,7 @@ impl Square {
     #[inline(always)]
     #[export_name = "Square_file"]
     pub extern "C" fn file(self) -> u8 {
-        (self.0.get() + 8) / 9
+        (((self.0.get() + 8) as u32 * 57) >> 9) as u8
     }
 
     /// Finds the rank in range `1..=9`.
@@ -86,7 +86,7 @@ impl Square {
     #[inline(always)]
     #[export_name = "Square_rank"]
     pub extern "C" fn rank(self) -> u8 {
-        ((self.0.get() - 1) % 9) + 1
+        self.0.get() + 9 - 9 * self.file()
     }
 
     /// Finds the index of `self` in range `1..=81`.
