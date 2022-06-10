@@ -1,3 +1,5 @@
+use crate::ToUsi;
+
 /// Kinds of pieces.
 ///
 /// [`PieceKind`] and <code>[Option]<[PieceKind]></code> are both 1-byte data types.
@@ -272,6 +274,31 @@ impl PieceKind {
 impl_ord_for_fieldless_enum!(PieceKind);
 impl_hash_for_fieldless_enum!(PieceKind);
 
+/// USI representation of a piece kind.
+///
+/// Since: 0.1.4
+impl ToUsi for PieceKind {
+    fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
+        let piece_kind = *self;
+        if piece_kind as u8 >= PieceKind::ProPawn as u8 {
+            let table = b"+P+L+N+S+B+R";
+            let index = piece_kind as usize - PieceKind::ProPawn as usize;
+            debug_assert!(index < 12);
+            // Safety: table has only ASCII bytes, index < 6
+            sink.write_str(unsafe {
+                core::str::from_utf8_unchecked(table.get_unchecked(2 * index..2 * index + 2))
+            })
+        } else {
+            debug_assert!(piece_kind as u8 <= PieceKind::King as u8);
+            let symbols = b"PLNSGBRK";
+            // Safety: 1 <= piece_kind <= 8
+            let c = *unsafe { symbols.get_unchecked(piece_kind as usize - 1) };
+            // Safety: the written byte is in ASCII for every branch
+            unsafe { crate::common::write_ascii_byte(sink, c) }
+        }
+    }
+}
+
 /// <code>[Option]<[PieceKind]></code> with defined representation.
 ///
 /// The correspondence is:
@@ -325,6 +352,37 @@ mod tests {
         assert_eq!(PieceKind::all().len(), PieceKind::NUM);
         for i in 0..PieceKind::NUM {
             assert_eq!(PieceKind::all()[i].array_index(), i);
+        }
+    }
+
+    // reference implementation
+    fn to_usi_reference<W: core::fmt::Write>(this: &PieceKind, sink: &mut W) -> core::fmt::Result {
+        match *this {
+            PieceKind::Pawn => sink.write_char('P'),
+            PieceKind::Lance => sink.write_char('L'),
+            PieceKind::Knight => sink.write_char('N'),
+            PieceKind::Silver => sink.write_char('S'),
+            PieceKind::Gold => sink.write_char('G'),
+            PieceKind::Bishop => sink.write_char('B'),
+            PieceKind::Rook => sink.write_char('R'),
+            PieceKind::King => sink.write_char('K'),
+            PieceKind::ProPawn => sink.write_str("+P"),
+            PieceKind::ProLance => sink.write_str("+L"),
+            PieceKind::ProKnight => sink.write_str("+N"),
+            PieceKind::ProSilver => sink.write_str("+S"),
+            PieceKind::ProBishop => sink.write_str("+B"),
+            PieceKind::ProRook => sink.write_str("+R"),
+        }
+    }
+
+    #[test]
+    fn to_usi_works() {
+        for piece_kind in PieceKind::all() {
+            let mut actual = String::new();
+            piece_kind.to_usi(&mut actual).unwrap();
+            let mut expected = String::new();
+            to_usi_reference(&piece_kind, &mut expected).unwrap();
+            assert_eq!(actual, expected);
         }
     }
 }

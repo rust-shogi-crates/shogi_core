@@ -1,6 +1,6 @@
 use core::num::NonZeroU8;
 
-use crate::Color;
+use crate::{common, Color, ToUsi};
 
 /// A square.
 ///
@@ -237,6 +237,19 @@ impl Square {
 impl_ord_for_single_field!(Square);
 impl_hash_for_single_field!(Square);
 
+/// USI representation of a square.
+///
+/// Since: 0.1.4
+impl ToUsi for Square {
+    fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
+        // Safety: '1'..='9' is always an ASCII byte
+        unsafe { common::write_ascii_byte(sink, b'0' + self.file()) }?;
+        // Safety: 'a'..='i' is always an ASCII byte
+        unsafe { common::write_ascii_byte(sink, b'a' + self.rank() - 1) }?;
+        Ok(())
+    }
+}
+
 /// C interface of <code>[Option]<[Square]></code>.
 ///
 /// This type is provided for C interoperability.
@@ -365,5 +378,90 @@ mod tests {
         for (index, sq) in Square::all().enumerate() {
             assert_eq!(sq.array_index(), index);
         }
+    }
+
+    #[test]
+    fn to_usi_works() {
+        assert_eq!(Square::SQ_1A.to_usi_owned(), "1a".to_owned());
+        assert_eq!(Square::SQ_1B.to_usi_owned(), "1b".to_owned());
+        assert_eq!(Square::SQ_1C.to_usi_owned(), "1c".to_owned());
+        assert_eq!(Square::SQ_1D.to_usi_owned(), "1d".to_owned());
+        assert_eq!(Square::SQ_1E.to_usi_owned(), "1e".to_owned());
+        assert_eq!(Square::SQ_1F.to_usi_owned(), "1f".to_owned());
+        assert_eq!(Square::SQ_1G.to_usi_owned(), "1g".to_owned());
+        assert_eq!(Square::SQ_1H.to_usi_owned(), "1h".to_owned());
+        assert_eq!(Square::SQ_1I.to_usi_owned(), "1i".to_owned());
+        assert_eq!(Square::SQ_2A.to_usi_owned(), "2a".to_owned());
+        assert_eq!(Square::SQ_2B.to_usi_owned(), "2b".to_owned());
+        assert_eq!(Square::SQ_2C.to_usi_owned(), "2c".to_owned());
+        assert_eq!(Square::SQ_2D.to_usi_owned(), "2d".to_owned());
+        assert_eq!(Square::SQ_2E.to_usi_owned(), "2e".to_owned());
+        assert_eq!(Square::SQ_2F.to_usi_owned(), "2f".to_owned());
+        assert_eq!(Square::SQ_2G.to_usi_owned(), "2g".to_owned());
+        assert_eq!(Square::SQ_2H.to_usi_owned(), "2h".to_owned());
+        assert_eq!(Square::SQ_2I.to_usi_owned(), "2i".to_owned());
+        assert_eq!(Square::SQ_3A.to_usi_owned(), "3a".to_owned());
+        assert_eq!(Square::SQ_3B.to_usi_owned(), "3b".to_owned());
+        assert_eq!(Square::SQ_3C.to_usi_owned(), "3c".to_owned());
+        assert_eq!(Square::SQ_3D.to_usi_owned(), "3d".to_owned());
+        assert_eq!(Square::SQ_3E.to_usi_owned(), "3e".to_owned());
+        assert_eq!(Square::SQ_3F.to_usi_owned(), "3f".to_owned());
+        assert_eq!(Square::SQ_3G.to_usi_owned(), "3g".to_owned());
+        assert_eq!(Square::SQ_3H.to_usi_owned(), "3h".to_owned());
+        assert_eq!(Square::SQ_3I.to_usi_owned(), "3i".to_owned());
+        assert_eq!(Square::SQ_4A.to_usi_owned(), "4a".to_owned());
+        assert_eq!(Square::SQ_4B.to_usi_owned(), "4b".to_owned());
+        assert_eq!(Square::SQ_4C.to_usi_owned(), "4c".to_owned());
+        assert_eq!(Square::SQ_4D.to_usi_owned(), "4d".to_owned());
+        assert_eq!(Square::SQ_4E.to_usi_owned(), "4e".to_owned());
+        assert_eq!(Square::SQ_4F.to_usi_owned(), "4f".to_owned());
+        assert_eq!(Square::SQ_4G.to_usi_owned(), "4g".to_owned());
+        assert_eq!(Square::SQ_4H.to_usi_owned(), "4h".to_owned());
+        assert_eq!(Square::SQ_4I.to_usi_owned(), "4i".to_owned());
+        assert_eq!(Square::SQ_5A.to_usi_owned(), "5a".to_owned());
+        assert_eq!(Square::SQ_5B.to_usi_owned(), "5b".to_owned());
+        assert_eq!(Square::SQ_5C.to_usi_owned(), "5c".to_owned());
+        assert_eq!(Square::SQ_5D.to_usi_owned(), "5d".to_owned());
+        assert_eq!(Square::SQ_5E.to_usi_owned(), "5e".to_owned());
+        assert_eq!(Square::SQ_5F.to_usi_owned(), "5f".to_owned());
+        assert_eq!(Square::SQ_5G.to_usi_owned(), "5g".to_owned());
+        assert_eq!(Square::SQ_5H.to_usi_owned(), "5h".to_owned());
+        assert_eq!(Square::SQ_5I.to_usi_owned(), "5i".to_owned());
+        assert_eq!(Square::SQ_6A.to_usi_owned(), "6a".to_owned());
+        assert_eq!(Square::SQ_6B.to_usi_owned(), "6b".to_owned());
+        assert_eq!(Square::SQ_6C.to_usi_owned(), "6c".to_owned());
+        assert_eq!(Square::SQ_6D.to_usi_owned(), "6d".to_owned());
+        assert_eq!(Square::SQ_6E.to_usi_owned(), "6e".to_owned());
+        assert_eq!(Square::SQ_6F.to_usi_owned(), "6f".to_owned());
+        assert_eq!(Square::SQ_6G.to_usi_owned(), "6g".to_owned());
+        assert_eq!(Square::SQ_6H.to_usi_owned(), "6h".to_owned());
+        assert_eq!(Square::SQ_6I.to_usi_owned(), "6i".to_owned());
+        assert_eq!(Square::SQ_7A.to_usi_owned(), "7a".to_owned());
+        assert_eq!(Square::SQ_7B.to_usi_owned(), "7b".to_owned());
+        assert_eq!(Square::SQ_7C.to_usi_owned(), "7c".to_owned());
+        assert_eq!(Square::SQ_7D.to_usi_owned(), "7d".to_owned());
+        assert_eq!(Square::SQ_7E.to_usi_owned(), "7e".to_owned());
+        assert_eq!(Square::SQ_7F.to_usi_owned(), "7f".to_owned());
+        assert_eq!(Square::SQ_7G.to_usi_owned(), "7g".to_owned());
+        assert_eq!(Square::SQ_7H.to_usi_owned(), "7h".to_owned());
+        assert_eq!(Square::SQ_7I.to_usi_owned(), "7i".to_owned());
+        assert_eq!(Square::SQ_8A.to_usi_owned(), "8a".to_owned());
+        assert_eq!(Square::SQ_8B.to_usi_owned(), "8b".to_owned());
+        assert_eq!(Square::SQ_8C.to_usi_owned(), "8c".to_owned());
+        assert_eq!(Square::SQ_8D.to_usi_owned(), "8d".to_owned());
+        assert_eq!(Square::SQ_8E.to_usi_owned(), "8e".to_owned());
+        assert_eq!(Square::SQ_8F.to_usi_owned(), "8f".to_owned());
+        assert_eq!(Square::SQ_8G.to_usi_owned(), "8g".to_owned());
+        assert_eq!(Square::SQ_8H.to_usi_owned(), "8h".to_owned());
+        assert_eq!(Square::SQ_8I.to_usi_owned(), "8i".to_owned());
+        assert_eq!(Square::SQ_9A.to_usi_owned(), "9a".to_owned());
+        assert_eq!(Square::SQ_9B.to_usi_owned(), "9b".to_owned());
+        assert_eq!(Square::SQ_9C.to_usi_owned(), "9c".to_owned());
+        assert_eq!(Square::SQ_9D.to_usi_owned(), "9d".to_owned());
+        assert_eq!(Square::SQ_9E.to_usi_owned(), "9e".to_owned());
+        assert_eq!(Square::SQ_9F.to_usi_owned(), "9f".to_owned());
+        assert_eq!(Square::SQ_9G.to_usi_owned(), "9g".to_owned());
+        assert_eq!(Square::SQ_9H.to_usi_owned(), "9h".to_owned());
+        assert_eq!(Square::SQ_9I.to_usi_owned(), "9i".to_owned());
     }
 }
