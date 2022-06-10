@@ -287,6 +287,15 @@ impl CompactMove {
 impl_ord_for_single_field!(CompactMove);
 impl_hash_for_single_field!(CompactMove);
 
+/// USI representation of a move (compact representation).
+///
+/// Since: 0.1.4
+impl ToUsi for CompactMove {
+    fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
+        <Move as From<CompactMove>>::from(*self).to_usi(sink)
+    }
+}
+
 /// C-compatible type for <code>[Option]<[CompactMove]></code>.
 ///
 /// cbindgen cannot deduce that <code>[Option]<[CompactMove]></code> can be represented by `uint16_t` in C, so we need to define the bridge type.
