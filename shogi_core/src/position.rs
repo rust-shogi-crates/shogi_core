@@ -228,6 +228,15 @@ impl Position {
         self.inner.piece_set(square, piece)
     }
 
+    /// Finds the subset of squares with a piece.
+    ///
+    /// Since: 0.1.4
+    #[export_name = "Position_occupied_bitboard"]
+    #[inline(always)]
+    pub extern "C" fn occupied_bitboard(&self) -> Bitboard {
+        self.inner.occupied_bitboard()
+    }
+
     /// Finds the subset of squares with no pieces.
     #[export_name = "Position_vacant_bitboard"]
     pub extern "C" fn vacant_bitboard(&self) -> Bitboard {
@@ -601,11 +610,20 @@ impl PartialPosition {
         }
     }
 
+    /// Finds the subset of squares with a piece.
+    ///
+    /// Since: 0.1.4
+    #[export_name = "PartialPosition_occupied_bitboard"]
+    #[inline(always)]
+    pub extern "C" fn occupied_bitboard(&self) -> Bitboard {
+        self.player_bb[0] | self.player_bb[1]
+    }
+
     /// Finds the subset of squares with no pieces.
     #[export_name = "PartialPosition_vacant_bitboard"]
     #[inline(always)]
     pub extern "C" fn vacant_bitboard(&self) -> Bitboard {
-        !(self.player_bb[0] | self.player_bb[1])
+        !self.occupied_bitboard()
     }
 
     /// Finds the subset of squares where a piece of the specified player is placed.
