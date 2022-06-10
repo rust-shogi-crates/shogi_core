@@ -741,6 +741,13 @@ OptionCompactMove PartialPosition_last_compact_move(const struct PartialPosition
 bool PartialPosition_make_compact_move(struct PartialPosition *self, CompactMove mv);
 
 /**
+ * Finds the subset of squares with a piece.
+ *
+ * Since: 0.1.4
+ */
+struct Bitboard PartialPosition_occupied_bitboard(const struct PartialPosition *self);
+
+/**
  * C interface to [`PartialPosition::piece_at`].
  */
 OptionPiece PartialPosition_piece_at(const struct PartialPosition *self, Square square);
@@ -904,6 +911,13 @@ OptionCompactMove Position_last_compact_move(const struct Position *self);
  * If it returns false, it is guaranteed that self is not modified.
  */
 bool Position_make_compact_move(struct Position *self, CompactMove mv);
+
+/**
+ * Finds the subset of squares with a piece.
+ *
+ * Since: 0.1.4
+ */
+struct Bitboard Position_occupied_bitboard(const struct Position *self);
 
 /**
  * C interface to [`Position::piece_at`].
