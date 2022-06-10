@@ -1,6 +1,6 @@
 use core::num::NonZeroU16;
 
-use crate::{c_compat::OptionSquare, Piece, Square};
+use crate::{c_compat::OptionSquare, Piece, Square, ToUsi};
 
 /// A move.
 ///
@@ -127,6 +127,42 @@ impl core::hash::Hash for Move {
                 to.hash(state);
             }
         }
+    }
+}
+
+/// USI representation of a move.
+///
+/// Examples:
+/// ```
+/// # use shogi_core::{Move, Piece, Square, ToUsi};
+/// let mv = Move::Normal { from: Square::SQ_7G, to: Square::SQ_7F, promote: false };
+/// assert_eq!(mv.to_usi_owned(), "7g7f".to_owned());
+/// let mv = Move::Normal { from: Square::SQ_8H, to: Square::SQ_2B, promote: true };
+/// assert_eq!(mv.to_usi_owned(), "8h2b+".to_owned());
+/// let mv = Move::Drop { piece: Piece::B_S, to: Square::SQ_5B };
+/// assert_eq!(mv.to_usi_owned(), "S*5b".to_owned());
+/// ```
+/// Since: 0.1.4
+impl ToUsi for Move {
+    fn to_usi<W: core::fmt::Write>(&self, sink: &mut W) -> core::fmt::Result {
+        match *self {
+            Move::Normal { from, to, promote } => {
+                from.to_usi(sink)?;
+                to.to_usi(sink)?;
+                if promote {
+                    // Safety: b'+' is an ASCII byte
+                    unsafe { crate::common::write_ascii_byte(sink, b'+') }?;
+                }
+            }
+            Move::Drop { piece, to } => {
+                let piece_kind = piece.piece_kind();
+                piece_kind.to_usi(sink)?;
+                // Safety: b'*' is an ASCII byte
+                unsafe { crate::common::write_ascii_byte(sink, b'*') }?;
+                to.to_usi(sink)?;
+            }
+        }
+        Ok(())
     }
 }
 
