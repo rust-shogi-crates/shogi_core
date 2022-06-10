@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1654337185980,
+  "lastUpdate": 1654876897038,
   "repoUrl": "https://github.com/rust-shogi-crates/shogi_core",
   "entries": {
     "Benchmark result (shogi_legality_lite)": [
@@ -215,6 +215,60 @@ window.BENCHMARK_DATA = {
             "name": "bitboard::tests::shift_up_bench",
             "value": 20491,
             "range": "± 761",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "3303362+koba-e964@users.noreply.github.com",
+            "name": "Hiroki Kobayashi",
+            "username": "koba-e964"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9875c498f6ef65a433e90cc242e789747f80d1e8",
+          "message": "Merge pull request #38 from rust-shogi-crates/fix/tousi-for-move\n\nimpl ToUsi for Move",
+          "timestamp": "2022-06-11T01:00:25+09:00",
+          "tree_id": "66e75ab459a31280a793072f61d2a2262b9fdcf0",
+          "url": "https://github.com/rust-shogi-crates/shogi_core/commit/9875c498f6ef65a433e90cc242e789747f80d1e8"
+        },
+        "date": 1654876896167,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "bitboard::tests::pop_bench",
+            "value": 98,
+            "range": "± 2",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_down_bench",
+            "value": 23855,
+            "range": "± 331",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_left_bench",
+            "value": 22064,
+            "range": "± 318",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_right_bench",
+            "value": 24380,
+            "range": "± 57",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_up_bench",
+            "value": 23857,
+            "range": "± 533",
             "unit": "ns/iter"
           }
         ]
