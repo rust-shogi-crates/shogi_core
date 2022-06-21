@@ -16,8 +16,8 @@ This crate provides fundamental data types and functions used in shogi.
 
 This crate does not provide legality checking. There are many ways to check legality, so it is responsibility of other crates.
 
-This crate supports output of SEFN + moves format. This helps easy testing of positions.
-This crate does not support reading of SEFN + moves format because of its complexity. Other crates are responsible for this.
+This crate supports output of SFEN + moves format. This helps easy testing of positions.
+This crate does not support reading of SFEN + moves format because of its complexity. Other crates are responsible for this.
 
 ## Dependencies
 This crate depends only on `core::*` and `alloc::*`. This crate does not depend on `std::*`.
