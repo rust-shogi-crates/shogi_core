@@ -50,6 +50,7 @@ impl Piece {
     }
     /// An inverse of [`Piece::new`]. Finds a [`PieceKind`] and a [`Color`] from a [`Piece`].
     #[must_use]
+    #[inline(always)]
     pub fn to_parts(self) -> (PieceKind, Color) {
         let data = self.0.get();
         let disc = data & 15;
@@ -66,18 +67,21 @@ impl Piece {
     /// Finds the [`PieceKind`] of this piece.
     #[must_use]
     #[export_name = "Piece_piece_kind"]
+    #[inline(always)]
     pub extern "C" fn piece_kind(self) -> PieceKind {
         self.to_parts().0
     }
     /// Finds the [`Color`] of this piece.
     #[must_use]
     #[export_name = "Piece_color"]
+    #[inline(always)]
     pub extern "C" fn color(self) -> Color {
         self.to_parts().1
     }
 
     /// Returns the internal representation.
     #[must_use]
+    #[inline(always)]
     pub fn as_u8(self) -> u8 {
         self.0.get()
     }
@@ -91,8 +95,9 @@ impl Piece {
 
     /// C interface of [`Piece::promote`].
     #[no_mangle]
+    #[inline(always)]
     pub extern "C" fn Piece_promote(self) -> OptionPiece {
-        self.promote().into()
+        OptionPiece::from(self.promote())
     }
 
     /// Un-promote a [`Piece`]. Same as [`PieceKind::unpromote`] with color.
@@ -104,8 +109,9 @@ impl Piece {
 
     /// C interface of [`Piece::unpromote`].
     #[no_mangle]
+    #[inline(always)]
     pub extern "C" fn Piece_unpromote(self) -> OptionPiece {
-        self.unpromote().into()
+        OptionPiece::from(self.unpromote())
     }
 
     /// `value` must be in range 1..=14 or 17..=30.
