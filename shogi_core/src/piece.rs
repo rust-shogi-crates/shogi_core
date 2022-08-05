@@ -121,7 +121,11 @@ impl Piece {
     #[cfg(feature = "experimental")]
     #[inline]
     pub const fn array_index(self) -> usize {
-        self.0.get() as usize - 1
+        let result = self.0.get() as usize - 1;
+        if result >= Self::NUM {
+            unsafe { core::hint::unreachable_unchecked() };
+        }
+        result
     }
 
     /// How many elements should an array indexed by [`Piece`] have?

@@ -73,6 +73,7 @@ impl Square {
     #[inline(always)]
     #[export_name = "Square_file"]
     pub extern "C" fn file(self) -> u8 {
+        self.sanity_check();
         (((self.0.get() + 8) as u32 * 57) >> 9) as u8
     }
 
@@ -86,6 +87,7 @@ impl Square {
     #[inline(always)]
     #[export_name = "Square_rank"]
     pub extern "C" fn rank(self) -> u8 {
+        self.sanity_check();
         self.0.get() + 9 - 9 * self.file()
     }
 
@@ -100,6 +102,7 @@ impl Square {
     #[inline(always)]
     #[export_name = "Square_index"]
     pub extern "C" fn index(self) -> u8 {
+        self.sanity_check();
         self.0.get()
     }
 
@@ -168,6 +171,9 @@ impl Square {
     /// `value` must be in range 1..=81
     #[inline(always)]
     pub const unsafe fn from_u8_unchecked(value: u8) -> Self {
+        if !matches!(value, 1..=81) {
+            core::hint::unreachable_unchecked();
+        }
         Self(NonZeroU8::new_unchecked(value))
     }
 
@@ -178,6 +184,9 @@ impl Square {
     #[inline(always)]
     #[no_mangle]
     pub unsafe extern "C" fn Square_from_u8_unchecked(value: u8) -> Self {
+        if !matches!(value, 1..=81) {
+            core::hint::unreachable_unchecked();
+        }
         Self(NonZeroU8::new_unchecked(value))
     }
 
@@ -192,6 +201,7 @@ impl Square {
     /// ```
     #[export_name = "Square_shift"]
     pub extern "C" fn shift(self, file_delta: i8, rank_delta: i8) -> Option<Self> {
+        self.sanity_check();
         let file_m1 = (self.file() as i8).wrapping_add(file_delta).wrapping_sub(1);
         let rank_m1 = (self.rank() as i8).wrapping_add(rank_delta).wrapping_sub(1);
         if !matches!(file_m1, 0..=8) || !matches!(rank_m1, 0..=8) {
@@ -206,7 +216,13 @@ impl Square {
     /// Since: 0.1.2
     #[inline(always)]
     pub const fn array_index(self) -> usize {
-        (self.0.get() - 1) as usize
+        self.sanity_check();
+        let result = (self.0.get() - 1) as usize;
+        // Safety: result < Square::NUM always holds
+        if result >= Self::NUM {
+            unsafe { core::hint::unreachable_unchecked() };
+        }
+        result
     }
 
     /// How many elements should an array indexed by [`Square`] have?
@@ -231,6 +247,16 @@ impl Square {
     /// ```
     pub fn all() -> impl core::iter::Iterator<Item = Self> {
         (1..=81).map(|index| unsafe { Self::from_u8_unchecked(index) })
+    }
+
+    // Check if self.0 is in 1..=81
+    #[inline(always)]
+    const fn sanity_check(self) {
+        debug_assert!(matches!(self.0.get(), 1..=81));
+        // Safety: for any valid Square, its representation must be in 1..=81.
+        if !matches!(self.0.get(), 1..=81) {
+            unsafe { core::hint::unreachable_unchecked() }
+        }
     }
 }
 
