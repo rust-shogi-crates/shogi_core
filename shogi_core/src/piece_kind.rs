@@ -218,7 +218,12 @@ impl PieceKind {
     /// Since: 0.1.2
     #[inline]
     pub const fn array_index(self) -> usize {
-        self as usize - 1
+        let result = self as usize - 1;
+        // Safety: 0 <= self as usize - 1 <= 13 always holds
+        if result >= 14 {
+            unsafe { core::hint::unreachable_unchecked() };
+        }
+        result
     }
 
     /// How many elements should an array indexed by [`PieceKind`] have?

@@ -39,7 +39,12 @@ impl Color {
     /// Since: 0.1.2
     #[inline]
     pub const fn array_index(self) -> usize {
-        self as usize - 1
+        let result = self as usize - 1;
+        // Safety: 0 <= self as usize - 1 < 2 always holds.
+        if result >= 2 {
+            unsafe { core::hint::unreachable_unchecked() };
+        }
+        result
     }
 
     /// How many elements should an array indexed by [`Color`] have?
