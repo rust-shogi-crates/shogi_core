@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659692801745,
+  "lastUpdate": 1659692842816,
   "repoUrl": "https://github.com/rust-shogi-crates/shogi_core",
   "entries": {
     "Benchmark result (shogi_legality_lite)": [
@@ -431,6 +431,60 @@ window.BENCHMARK_DATA = {
             "name": "bitboard::tests::shift_up_bench",
             "value": 23882,
             "range": "± 1106",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "3303362+koba-e964@users.noreply.github.com",
+            "name": "Hiroki Kobayashi",
+            "username": "koba-e964"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "0bf8798ea31a0055bbe07dc3b0d780dabd077c53",
+          "message": "Merge pull request #41 from rust-shogi-crates/fix/sfen-typo\n\nSEFN -> SFEN",
+          "timestamp": "2022-08-05T18:46:34+09:00",
+          "tree_id": "ccdf6b2687f5030a9388ac4f275cdbdfd4ce9e78",
+          "url": "https://github.com/rust-shogi-crates/shogi_core/commit/0bf8798ea31a0055bbe07dc3b0d780dabd077c53"
+        },
+        "date": 1659692841943,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "bitboard::tests::pop_bench",
+            "value": 96,
+            "range": "± 0",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_down_bench",
+            "value": 20221,
+            "range": "± 50",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_left_bench",
+            "value": 19012,
+            "range": "± 49",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_right_bench",
+            "value": 20532,
+            "range": "± 58",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_up_bench",
+            "value": 20274,
+            "range": "± 51",
             "unit": "ns/iter"
           }
         ]
