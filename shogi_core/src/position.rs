@@ -563,7 +563,7 @@ impl PartialPosition {
     /// ```
     #[inline(always)]
     pub fn piece_at(&self, square: Square) -> Option<Piece> {
-        self.PartialPosition_piece_at(square).into()
+        <Option<Piece>>::from(self.PartialPosition_piece_at(square))
     }
 
     /// C interface to [`PartialPosition::piece_at`].
@@ -583,7 +583,7 @@ impl PartialPosition {
         let index = square.index() - 1;
         let old = self.piece_at(square);
         // Safety: square.index() is in range 1..=81
-        *unsafe { self.board.get_unchecked_mut(index as usize) } = piece.into();
+        *unsafe { self.board.get_unchecked_mut(index as usize) } = OptionPiece::from(piece);
         let single = Bitboard::single_inlined(square);
         self.player_bb[0] = single.andnot(self.player_bb[0]);
         self.player_bb[1] = single.andnot(self.player_bb[1]);
@@ -602,10 +602,10 @@ impl PartialPosition {
             let piece_kind = piece.piece_kind();
             self.piece_bb[piece_kind.array_index()] |= single;
             if let Piece::B_K = piece {
-                self.king_square[0] = Some(square).into();
+                self.king_square[0] = OptionSquare::from(Some(square));
             }
             if let Piece::W_K = piece {
-                self.king_square[1] = Some(square).into();
+                self.king_square[1] = OptionSquare::from(Some(square));
             }
         }
     }
