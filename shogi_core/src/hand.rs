@@ -199,7 +199,7 @@ impl_hash_for_single_field!(Hand);
 
 /// Finds the USI representation of hand: <https://web.archive.org/web/20080131070731/http://www.glaurungchess.com/shogi/usi.html>
 ///
-/// The order of pieces are defined: `RBGSNLPrbgsnlp`.
+/// The order of pieces are defined: `GRBSNLPgrbsnlp`.
 ///
 /// Examples:
 /// ```
