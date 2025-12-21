@@ -278,7 +278,6 @@ impl CompactMove {
 
     /// Finds whether `self` is a drop move.
     #[export_name = "CompactMove_is_drop"]
-    #[inline]
     pub extern "C" fn is_drop(self) -> bool {
         (self.0.get() & 128) != 0
     }

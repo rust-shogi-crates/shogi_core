@@ -194,7 +194,6 @@ impl PieceKind {
     /// `repr` must be a valid representation of [`PieceKind`].
     /// This condition is equivalent to `1 <= repr && repr <= 14`.
     #[no_mangle]
-    #[inline(always)]
     pub unsafe extern "C" fn PieceKind_from_u8_unchecked(repr: u8) -> Self {
         core::mem::transmute(repr)
     }

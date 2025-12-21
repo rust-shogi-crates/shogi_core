@@ -107,7 +107,8 @@ mod simple_alloc {
             {
                 return null_mut();
             };
-            (ARENA_BSS.get() as *mut u8).add(allocated)
+            let arena_ptr = core::ptr::addr_of_mut!(ARENA_BSS);
+            (*arena_ptr).get().cast::<u8>().add(allocated)
         }
         unsafe fn dealloc(&self, _ptr: *mut u8, _layout: Layout) {}
     }

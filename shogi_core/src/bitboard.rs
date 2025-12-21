@@ -76,7 +76,6 @@ impl Bitboard {
     /// assert_eq!((sq11 | sq55).count(), 2);
     /// ```
     #[export_name = "Bitboard_count"]
-    #[inline(always)]
     pub extern "C" fn count(self) -> u8 {
         (self.0[0].count_ones() + self.0[1].count_ones()) as u8
     }
@@ -94,7 +93,6 @@ impl Bitboard {
     /// assert!(Bitboard::empty().is_empty());
     /// ```
     #[export_name = "Bitboard_is_empty"]
-    #[inline(always)]
     pub extern "C" fn is_empty(self) -> bool {
         self.0 == [0; 2]
     }
