@@ -208,7 +208,7 @@ impl ToUsi for Piece {
             }
             (piece_kind, color) => {
                 debug_assert!(piece_kind as u8 <= PieceKind::King as u8);
-                let symbols = b"PLNSGBRKplnsgbrk";
+                let symbols = b"PLNSBRGKplnsbrgk";
                 let offset = match color {
                     Color::Black => 0,
                     Color::White => 8,

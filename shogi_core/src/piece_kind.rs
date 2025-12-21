@@ -34,27 +34,27 @@ pub enum PieceKind {
     ///
     /// Discriminant = 4.
     Silver = 4,
-    /// A gold general. It moves one square horizontally, vertically, and diagonally forward.
-    /// Chess has no counterpart of it.
-    ///
-    /// Known as `金` (*kin*) or `金将` (*kinshō*), although the latter name is rarely used.
-    ///
-    /// Discriminant = 5.
-    Gold = 5,
     /// A bishop. It moves any number of squares diagonally,
     /// exactly the same way as a bishop does in chess.
     ///
     /// Known as `角` (*kaku*) or `角行` (*kakugyō*), although the latter name is rarely used.
     ///
-    /// Discriminant = 6.
-    Bishop = 6,
+    /// Discriminant = 5.
+    Bishop = 5,
     /// A rook. It moves any number of squares horizontally or vertically.
     /// It is almost the same as a rook in chess, but shogi has no rule of castling.
     ///
     /// Known as `飛` (*hi*) or `飛車` (*hisha*), although the former name is rarely used to refer to a piece.
     ///
+    /// Discriminant = 6.
+    Rook = 6,
+    /// A gold general. It moves one square horizontally, vertically, and diagonally forward.
+    /// Chess has no counterpart of it.
+    ///
+    /// Known as `金` (*kin*) or `金将` (*kinshō*), although the latter name is rarely used.
+    ///
     /// Discriminant = 7.
-    Rook = 7,
+    Gold = 7,
     /// A king. It moves one square horizontally, vertically or diagonally.
     /// A move that would expose the king to an enemy piece's capture threat is an illegal move,
     /// and the player that has no legal moves immediately loses.
@@ -119,9 +119,9 @@ impl PieceKind {
             PieceKind::Lance => Some(PieceKind::ProLance),
             PieceKind::Knight => Some(PieceKind::ProKnight),
             PieceKind::Silver => Some(PieceKind::ProSilver),
-            PieceKind::Gold => None,
             PieceKind::Bishop => Some(PieceKind::ProBishop),
             PieceKind::Rook => Some(PieceKind::ProRook),
+            PieceKind::Gold => None,
             PieceKind::King => None,
             PieceKind::ProPawn => None,
             PieceKind::ProLance => None,
@@ -142,9 +142,9 @@ impl PieceKind {
             PieceKind::Lance => None,
             PieceKind::Knight => None,
             PieceKind::Silver => None,
-            PieceKind::Gold => None,
             PieceKind::Bishop => None,
             PieceKind::Rook => None,
+            PieceKind::Gold => None,
             PieceKind::King => None,
             PieceKind::ProPawn => Some(PieceKind::Pawn),
             PieceKind::ProLance => Some(PieceKind::Lance),
@@ -261,9 +261,9 @@ impl PieceKind {
             PieceKind::Lance,
             PieceKind::Knight,
             PieceKind::Silver,
-            PieceKind::Gold,
             PieceKind::Bishop,
             PieceKind::Rook,
+            PieceKind::Gold,
             PieceKind::King,
             PieceKind::ProPawn,
             PieceKind::ProLance,
@@ -294,7 +294,7 @@ impl ToUsi for PieceKind {
             })
         } else {
             debug_assert!(piece_kind as u8 <= PieceKind::King as u8);
-            let symbols = b"PLNSGBRK";
+            let symbols = b"PLNSBRGK";
             // Safety: 1 <= piece_kind <= 8
             let c = *unsafe { symbols.get_unchecked(piece_kind as usize - 1) };
             // Safety: the written byte is in ASCII for every branch
