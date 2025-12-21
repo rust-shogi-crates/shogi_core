@@ -25,6 +25,22 @@
  */
 #define Color_NUM 2
 
+/**
+ * How many elements should an array indexed by [`PieceKind`] have?
+ *
+ * Examples:
+ * ```
+ * # use shogi_core::PieceKind;
+ * // values is long enough so values[piece_kind.index()] never panics
+ * let mut values = [0; PieceKind::NUM];
+ * values[PieceKind::Pawn.array_index()] = 10;
+ * values[PieceKind::Lance.array_index()] = 25;
+ * values[PieceKind::ProRook.array_index()] = 155;
+ * ```
+ * Since: 0.1.2
+ */
+#define PieceKind_NUM 14
+
 #if defined(DEFINE_EXPERIMENTAL)
 #define PieceKind_OPTION_NUM 15
 #endif
@@ -90,60 +106,6 @@ enum GameResolution {
   Aborted = 5,
 };
 typedef uint8_t GameResolution;
-
-/**
- * Kinds of illegal moves.
- *
- * [`IllegalMoveKind`] and <code>[Result]<[()][unit], [IllegalMoveKind]></code> are both 1-byte data types.
- * Because they are cheap to copy, they implement [`Copy`].
- *
- * Note: the equality of sizes are not guaranteed, but assumed to be correct.
- */
-enum IllegalMoveKind {
-  /**
-   * A player has two pawns in the same file. Promoted pawns are not counted.
-   *
-   * Discriminant = 1.
-   */
-  TwoPawns = 1,
-  /**
-   * A player ignored a check.
-   *
-   * Discriminant = 2.
-   */
-  IgnoredCheck = 2,
-  /**
-   * A drop-pawn-mate (`打ち歩詰め`, *uchifu-zume*).
-   *
-   * Discriminant = 3.
-   */
-  DropPawnMate = 3,
-  /**
-   * A drop move is stuck.
-   *
-   * Discriminant = 4.
-   */
-  DropStuck = 4,
-  /**
-   * A normal move is stuck.
-   *
-   * Discriminant = 5.
-   */
-  NormalStuck = 5,
-  /**
-   * A player made a move even after the game finished.
-   *
-   * Discriminant = 6.
-   */
-  GameFinished = 6,
-  /**
-   * Incorrect move.
-   *
-   * Discriminant = 7.
-   */
-  IncorrectMove = 7,
-};
-typedef uint8_t IllegalMoveKind;
 
 /**
  * Kinds of pieces.
@@ -280,6 +242,60 @@ enum PieceKind {
   ProRook = 14,
 };
 typedef uint8_t PieceKind;
+
+/**
+ * Kinds of illegal moves.
+ *
+ * [`IllegalMoveKind`] and <code>[Result]<[()][unit], [IllegalMoveKind]></code> are both 1-byte data types.
+ * Because they are cheap to copy, they implement [`Copy`].
+ *
+ * Note: the equality of sizes are not guaranteed, but assumed to be correct.
+ */
+enum IllegalMoveKind {
+  /**
+   * A player has two pawns in the same file. Promoted pawns are not counted.
+   *
+   * Discriminant = 1.
+   */
+  TwoPawns = 1,
+  /**
+   * A player ignored a check.
+   *
+   * Discriminant = 2.
+   */
+  IgnoredCheck = 2,
+  /**
+   * A drop-pawn-mate (`打ち歩詰め`, *uchifu-zume*).
+   *
+   * Discriminant = 3.
+   */
+  DropPawnMate = 3,
+  /**
+   * A drop move is stuck.
+   *
+   * Discriminant = 4.
+   */
+  DropStuck = 4,
+  /**
+   * A normal move is stuck.
+   *
+   * Discriminant = 5.
+   */
+  NormalStuck = 5,
+  /**
+   * A player made a move even after the game finished.
+   *
+   * Discriminant = 6.
+   */
+  GameFinished = 6,
+  /**
+   * Incorrect move.
+   *
+   * Discriminant = 7.
+   */
+  IncorrectMove = 7,
+};
+typedef uint8_t IllegalMoveKind;
 
 #if defined(DEFINE_ALLOC)
 /**
@@ -1084,4 +1100,4 @@ struct Option_Square Square_shift(Square self,
                                   int8_t file_delta,
                                   int8_t rank_delta);
 
-#endif /* shogi_core_bindings_h */
+#endif  /* shogi_core_bindings_h */

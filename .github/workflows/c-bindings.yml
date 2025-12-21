@@ -17,14 +17,14 @@ jobs:
     strategy:
       matrix:
         cargo-bloat-version:
-          - '0.11.0'
+          - '0.12.1'
         cbindgen-version:
-          - '0.23.0'
+          - '0.29.2'
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: cargo version
       run: cargo --version
     - name: install nightly
@@ -64,5 +64,5 @@ jobs:
     - name: cargo bloat (display, per-crate, release)
       run: cargo +nightly bloat --release --no-default-features --features alloc --crates
     - name: cargo bloat (testing, release)
-      # Size <= 40KiB?
-      run: cargo +nightly bloat --release --no-default-features --features alloc --message-format json | jq --exit-status '."file-size" <= 40960'
+      # Text section size <= 10KiB?
+      run: cargo +nightly bloat --release --no-default-features --features alloc --message-format json | jq --exit-status '."text-section-size" <= 10240'
