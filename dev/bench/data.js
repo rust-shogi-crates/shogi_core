@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1659693626531,
+  "lastUpdate": 1766284641005,
   "repoUrl": "https://github.com/rust-shogi-crates/shogi_core",
   "entries": {
     "Benchmark result (shogi_legality_lite)": [
@@ -593,6 +593,60 @@ window.BENCHMARK_DATA = {
             "name": "bitboard::tests::shift_up_bench",
             "value": 20271,
             "range": "± 51",
+            "unit": "ns/iter"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "3303362+koba-e964@users.noreply.github.com",
+            "name": "Hiroki Kobayashi",
+            "username": "koba-e964"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "b6fe6362293cbe35709e88be2e8bae4750dcbfe4",
+          "message": "Merge pull request #47 from rust-shogi-crates/copilot/fix-ci-issues\n\nFix CI: Remove inline attributes from exported functions",
+          "timestamp": "2025-12-21T11:36:41+09:00",
+          "tree_id": "cd9ddd4d04feea54ac396d93a61577300c8e2614",
+          "url": "https://github.com/rust-shogi-crates/shogi_core/commit/b6fe6362293cbe35709e88be2e8bae4750dcbfe4"
+        },
+        "date": 1766284640754,
+        "tool": "cargo",
+        "benches": [
+          {
+            "name": "bitboard::tests::pop_bench",
+            "value": 78.22,
+            "range": "± 0.95",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_down_bench",
+            "value": 12432.9,
+            "range": "± 45.86",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_left_bench",
+            "value": 12747.63,
+            "range": "± 28.9",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_right_bench",
+            "value": 12451.68,
+            "range": "± 40.07",
+            "unit": "ns/iter"
+          },
+          {
+            "name": "bitboard::tests::shift_up_bench",
+            "value": 12429.77,
+            "range": "± 41.85",
             "unit": "ns/iter"
           }
         ]
