@@ -167,7 +167,7 @@ impl Hand {
     /// ```
     /// # use shogi_core::{PieceKind, Hand};
     /// let all: Vec<PieceKind> = Hand::all_hand_pieces().collect();
-    /// assert_eq!(all, [PieceKind::Pawn, PieceKind::Lance, PieceKind::Knight, PieceKind::Silver, PieceKind::Gold, PieceKind::Bishop, PieceKind::Rook]);
+    /// assert_eq!(all, [PieceKind::Pawn, PieceKind::Lance, PieceKind::Knight, PieceKind::Silver, PieceKind::Bishop, PieceKind::Rook, PieceKind::Gold]);
     /// ```
     /// Since: 0.1.2
     #[inline]
@@ -199,7 +199,7 @@ impl_hash_for_single_field!(Hand);
 
 /// Finds the USI representation of hand: <https://web.archive.org/web/20080131070731/http://www.glaurungchess.com/shogi/usi.html>
 ///
-/// The order of pieces are defined: `RBGSNLPrbgsnlp`.
+/// The order of pieces are defined: `GRBSNLPgrbsnlp`.
 ///
 /// Examples:
 /// ```
@@ -219,7 +219,7 @@ impl ToUsi for [Hand; 2] {
         if self[0] == Hand::new() && self[1] == Hand::new() {
             return sink.write_str("-");
         }
-        let pieces = [b"PLNSGBR", b"plnsgbr"];
+        let pieces = [b"PLNSBRG", b"plnsbrg"];
         for i in 0..2 {
             for j in (0..7).rev() {
                 // Safety: 0 <= j < 8
