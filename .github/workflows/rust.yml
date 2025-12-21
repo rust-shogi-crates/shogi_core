@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
     - name: cargo version
       run: cargo --version
     - name: install nightly
@@ -44,7 +44,7 @@ jobs:
     - name: benchmark
       run: ./bench.sh | tee gha-bench.txt
     - name: Store benchmark results
-      uses: benchmark-action/github-action-benchmark@v1
+      uses: benchmark-action/github-action-benchmark@4bdcce38c94cec68da58d012ac24b7b1155efe8b # v1.20.7
       with:
         name: Benchmark result (shogi_legality_lite)
         tool: cargo
