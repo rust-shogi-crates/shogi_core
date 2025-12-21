@@ -20,19 +20,16 @@ pub struct Game {
 impl Game {
     /// Returns the inner position.
     #[export_name = "Game_position"]
-    #[inline(always)]
     pub extern "C" fn position(&self) -> &Position {
         &self.inner
     }
     /// Sets the resolution of this game.
     #[export_name = "Game_resolve"]
-    #[inline(always)]
     pub extern "C" fn resolve(&mut self, resolution: GameResolution) {
         self.resolution = Some(resolution).into();
     }
     /// Unsets the resolution of this game.
     #[export_name = "Game_unresolve"]
-    #[inline(always)]
     pub extern "C" fn unresolve(&mut self) {
         self.resolution = None.into();
     }
@@ -63,19 +60,16 @@ pub struct PartialGame {
 impl PartialGame {
     /// Returns the inner position.
     #[export_name = "PartialGame_position"]
-    #[inline(always)]
     pub extern "C" fn position(&self) -> &PartialPosition {
         &self.inner
     }
     /// Sets the resolution of this game.
     #[export_name = "PartialGame_resolve"]
-    #[inline(always)]
     pub extern "C" fn resolve(&mut self, resolution: GameResolution) {
         self.resolution = Some(resolution).into();
     }
     /// Unsets the resolution of this game.
     #[export_name = "PartialGame_unresolve"]
-    #[inline(always)]
     pub extern "C" fn unresolve(&mut self) {
         self.resolution = None.into();
     }
@@ -108,14 +102,12 @@ pub struct Position {
 impl Position {
     /// Returns the inner [`PartialPosition`].
     #[export_name = "Position_inner"]
-    #[inline(always)]
     pub extern "C" fn inner(&self) -> &PartialPosition {
         &self.inner
     }
 
     /// Returns the initial position of [`Position`], i.e., the position before any moves given to it.
     #[export_name = "Position_initial_position"]
-    #[inline(always)]
     pub extern "C" fn initial_position(&self) -> &PartialPosition {
         &self.initial
     }
@@ -232,7 +224,6 @@ impl Position {
     ///
     /// Since: 0.1.4
     #[export_name = "Position_occupied_bitboard"]
-    #[inline(always)]
     pub extern "C" fn occupied_bitboard(&self) -> Bitboard {
         self.inner.occupied_bitboard()
     }
@@ -495,7 +486,6 @@ impl PartialPosition {
     /// assert_eq!(pos.side_to_move(), Color::White);
     /// ```
     #[export_name = "PartialPosition_side_to_move"]
-    #[inline(always)]
     pub extern "C" fn side_to_move(&self) -> Color {
         self.side
     }
@@ -508,7 +498,6 @@ impl PartialPosition {
 
     /// Returns the [`Hand`] of a player.
     #[export_name = "PartialPosition_hand_of_a_player"]
-    #[inline(always)]
     pub extern "C" fn hand_of_a_player(&self, color: Color) -> Hand {
         // Safety: color as usize is either 1 or 2
         *unsafe { self.hands.get_unchecked((color as u8 - 1) as usize) }
@@ -568,7 +557,6 @@ impl PartialPosition {
 
     /// C interface to [`PartialPosition::piece_at`].
     #[no_mangle]
-    #[inline(always)]
     pub extern "C" fn PartialPosition_piece_at(&self, square: Square) -> OptionPiece {
         let index = square.index() - 1;
         // Safety: square.index() is in range 1..=81
@@ -614,21 +602,18 @@ impl PartialPosition {
     ///
     /// Since: 0.1.4
     #[export_name = "PartialPosition_occupied_bitboard"]
-    #[inline(always)]
     pub extern "C" fn occupied_bitboard(&self) -> Bitboard {
         self.player_bb[0] | self.player_bb[1]
     }
 
     /// Finds the subset of squares with no pieces.
     #[export_name = "PartialPosition_vacant_bitboard"]
-    #[inline(always)]
     pub extern "C" fn vacant_bitboard(&self) -> Bitboard {
         !self.occupied_bitboard()
     }
 
     /// Finds the subset of squares where a piece of the specified player is placed.
     #[export_name = "PartialPosition_player_bitboard"]
-    #[inline(always)]
     pub extern "C" fn player_bitboard(&self, color: Color) -> Bitboard {
         self.player_bb[color.array_index()]
     }
@@ -645,7 +630,6 @@ impl PartialPosition {
     /// assert_eq!(white_rook, Bitboard::single(Square::SQ_8B));
     /// ```
     #[export_name = "PartialPosition_piece_bitboard"]
-    #[inline(always)]
     pub extern "C" fn piece_bitboard(&self, piece: Piece) -> Bitboard {
         let (piece_kind, color) = piece.to_parts();
         self.piece_bb[piece_kind.array_index()] & self.player_bb[color.array_index()]
@@ -661,7 +645,6 @@ impl PartialPosition {
     /// assert_eq!(rooks, Bitboard::single(Square::SQ_2H) | Bitboard::single(Square::SQ_8B));
     /// ```
     #[export_name = "PartialPosition_piece_kind_bitboard"]
-    #[inline(always)]
     pub extern "C" fn piece_kind_bitboard(&self, piece_kind: PieceKind) -> Bitboard {
         self.piece_bb[piece_kind.array_index()]
     }

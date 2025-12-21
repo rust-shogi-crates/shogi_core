@@ -67,14 +67,12 @@ impl Piece {
     /// Finds the [`PieceKind`] of this piece.
     #[must_use]
     #[export_name = "Piece_piece_kind"]
-    #[inline(always)]
     pub extern "C" fn piece_kind(self) -> PieceKind {
         self.to_parts().0
     }
     /// Finds the [`Color`] of this piece.
     #[must_use]
     #[export_name = "Piece_color"]
-    #[inline(always)]
     pub extern "C" fn color(self) -> Color {
         self.to_parts().1
     }
@@ -95,7 +93,6 @@ impl Piece {
 
     /// C interface of [`Piece::promote`].
     #[no_mangle]
-    #[inline(always)]
     pub extern "C" fn Piece_promote(self) -> OptionPiece {
         OptionPiece::from(self.promote())
     }
@@ -109,7 +106,6 @@ impl Piece {
 
     /// C interface of [`Piece::unpromote`].
     #[no_mangle]
-    #[inline(always)]
     pub extern "C" fn Piece_unpromote(self) -> OptionPiece {
         OptionPiece::from(self.unpromote())
     }

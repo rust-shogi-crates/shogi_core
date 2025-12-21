@@ -70,7 +70,6 @@ impl Square {
     /// use shogi_core::Square;
     /// assert_eq!(Square::SQ_3D.file(), 3);
     /// ```
-    #[inline(always)]
     #[export_name = "Square_file"]
     pub extern "C" fn file(self) -> u8 {
         self.sanity_check();
@@ -84,7 +83,6 @@ impl Square {
     /// use shogi_core::Square;
     /// assert_eq!(Square::SQ_3D.rank(), 4);
     /// ```
-    #[inline(always)]
     #[export_name = "Square_rank"]
     pub extern "C" fn rank(self) -> u8 {
         self.sanity_check();
@@ -99,7 +97,6 @@ impl Square {
     /// use shogi_core::Square;
     /// assert_eq!(Square::SQ_3D.index(), 22);
     /// ```
-    #[inline(always)]
     #[export_name = "Square_index"]
     pub extern "C" fn index(self) -> u8 {
         self.sanity_check();
@@ -134,7 +131,6 @@ impl Square {
     /// assert_eq!(Square::SQ_1A.flip(), Square::SQ_9I);
     /// assert_eq!(Square::SQ_3D.flip(), Square::SQ_7F);
     /// ```
-    #[inline(always)]
     #[export_name = "Square_flip"]
     pub extern "C" fn flip(self) -> Self {
         // Safety: self.0.get() is in range 1..=81.
@@ -150,7 +146,6 @@ impl Square {
     /// assert_eq!(Square::from_u8(0), None);
     /// assert_eq!(Square::from_u8(82), None);
     /// ```
-    #[inline]
     #[export_name = "Square_from_u8"]
     pub extern "C" fn from_u8(value: u8) -> Option<Self> {
         // The shortest possible machine code for this function in x86_64 (System V AMD64 ABI) is:
@@ -159,7 +154,7 @@ impl Square {
         // 0f 42 c7    cmovbl %edi, %eax
         if matches!(value as u32, 0..=81) {
             // Safety: `value` is in `0..=81`, which is the range of valid representations.
-            unsafe { core::mem::transmute::<_, OptionSquare>(value) }.into()
+            unsafe { core::mem::transmute::<u8, OptionSquare>(value) }.into()
         } else {
             None
         }
@@ -181,7 +176,6 @@ impl Square {
     ///
     /// # Safety
     /// `value` must be in range 1..=81
-    #[inline(always)]
     #[no_mangle]
     pub unsafe extern "C" fn Square_from_u8_unchecked(value: u8) -> Self {
         if !matches!(value, 1..=81) {

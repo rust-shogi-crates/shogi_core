@@ -1,4 +1,5 @@
 [workspace]
+resolver = "2"
 members = [
     "shogi_core",
     "shogi_core_c",

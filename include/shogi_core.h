@@ -154,7 +154,7 @@ typedef uint8_t IllegalMoveKind;
 enum PieceKind {
   /**
    * A pawn. Unlike in chess, it always moves one square forward,
-   * even if the destination square is occuipied by an enemy piece.
+   * even if the destination square is occupied by an enemy piece.
    *
    * Known as `歩` (*fu*) or `歩兵` (*fuhyō*), although the latter name is rarely used.
    *

@@ -20,7 +20,6 @@ impl Hand {
     /// assert_eq!(Hand::new(), Hand::default());
     /// ```
     #[export_name = "Hand_new"]
-    #[inline(always)]
     pub extern "C" fn new() -> Self {
         Self::default()
     }
